@@ -8,6 +8,8 @@ var min = -25;
 var max = 25;
 var len = 12;
 var container = document.getElementById("main");
+var keepAlive = [3, 6]
+var makeAlive = [10, 20];
 
 var scene = new THREE.Scene();
 scene.background = new THREE.Color(0xFFFFFF);
@@ -30,7 +32,7 @@ camera.position.set(12,20,-14);
 // addRandomCubes(1000, min, max);
 // addCube([0,0,0]);
 // addCube([1,1,1]);
-var cubes = addAllCubes(len,1);
+var cubes = addAllCubes(len,0.3);
 
 var whiteLight = new THREE.PointLight(0xffffff);
 whiteLight.position.set(0, 100, 0);
@@ -89,4 +91,22 @@ function livingNeighborCount(coords, cubes) {
 		}
 	}
 	return numAlive;
+}
+
+function evolve(cubes, keepAliveVals, makeAliveVals) {
+	for (var i = 0; i < cubes.length; i++) {
+		for (var j = 0; j < cubes.length; j++) {
+			for (var k = 0; k < cubes.length; k++) {
+				var cube = cubes[i][j][k];
+				var aliveVals = cube.userData.isAlive ? keepAliveVals : makeAliveVals;
+				cube.userData.isAlive = setAlive([i,j,k], aliveVals, cubes);
+				cube.material.opacity = +cube.userData.isAlive / 2;
+			}
+		}
+	}
+}
+
+function setAlive(coords, aliveVals, cubes) {
+	var nbrs = livingNeighborCount(coords,cubes);
+	return nbrs >= aliveVals[0] && nbrs <= aliveVals[1];
 }
