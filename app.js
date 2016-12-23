@@ -7,9 +7,9 @@ var far = 10000;
 var min = -25;
 var max = 25;
 var len = 12;
-var container = document.getElementById("main");
 var keepAlive = [3, 6]
-var makeAlive = [0, 10];
+var makeAlive = [10, 20];
+var then = Date.now();
 
 var scene = new THREE.Scene();
 scene.background = new THREE.Color(0xFFFFFF);
@@ -21,19 +21,22 @@ var camera =
 		near,
 		far
 	);
+camera.position.set(12,20,-14);
 scene.add(camera);
+var whiteLight = new THREE.PointLight(0xffffff);
+whiteLight.position.set(0, 100, 0);
+scene.add(whiteLight);
 
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(width, height);
 
+var container = document.getElementById("main");
 container.appendChild(renderer.domElement);
-camera.position.set(12,20,-14);
 
-var cubes = addAllCubes(len, 1);
+var cubes = addAllCubes(len, 0.4);
 
-var whiteLight = new THREE.PointLight(0xffffff);
-whiteLight.position.set(0, 100, 0);
-scene.add(whiteLight);
+var start = document.getElementById("start");
+start.addEventListener('click', evolve.bind(this,cubes,keepAlive,makeAlive));
 
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
 
@@ -91,13 +94,23 @@ function livingNeighborCount(coords, cubes) {
 }
 
 function evolve(cubes, keepAliveVals, makeAliveVals) {
-	var newStatus = getEvolveStatuses(cubes, keepAliveVals, makeAliveVals)
-	for (var i = 0; i < cubes.length; i++) {
-		for (var j = 0; j < cubes.length; j++) {
-			for (var k = 0; k < cubes.length; k++) {
-				var cube = cubes[i][j][k];
-				cube.userData.isAlive = newStatus[i][j][k];
-				cube.material.opacity = +cube.userData.isAlive / 2;
+	requestAnimationFrame(evolve.bind(this,cubes,keepAliveVals,makeAliveVals));
+
+	var interval = 2000;
+	var now = Date.now();
+	var delta = now - then;
+	if (delta > interval) {
+
+		then = now - delta % interval;
+
+		var newStatus = getEvolveStatuses(cubes, keepAliveVals, makeAliveVals)
+		for (var i = 0; i < cubes.length; i++) {
+			for (var j = 0; j < cubes.length; j++) {
+				for (var k = 0; k < cubes.length; k++) {
+					var cube = cubes[i][j][k];
+					cube.userData.isAlive = newStatus[i][j][k];
+					cube.material.opacity = +cube.userData.isAlive / 2;
+				}
 			}
 		}
 	}
