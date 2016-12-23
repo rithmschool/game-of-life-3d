@@ -9,9 +9,14 @@ var far = 10000;
 var min = -25;
 var max = 25;
 var len = 12;
-var keepAlive = [3, 6];
-var makeAlive = [3, 6];
-var then = Date.now();
+var keepAliveMin    = document.getElementById("keep-alive-min");
+var keepAliveMax    = document.getElementById("keep-alive-max");
+var makeAliveMin    = document.getElementById("make-alive-min");
+var makeAliveMax    = document.getElementById("make-alive-max");
+var keepAliveMinVal = document.getElementById("keep-alive-min-val");
+var keepAliveMaxVal = document.getElementById("keep-alive-max-val");
+var makeAliveMinVal = document.getElementById("make-alive-min-val");
+var makeAliveMaxVal = document.getElementById("make-alive-max-val");
 
 var scene = new THREE.Scene();
 scene.background = new THREE.Color(0xFFFFFF);
@@ -23,6 +28,7 @@ var camera =
 		near,
 		far
 	);
+
 camera.position.set(18,30,-21);
 scene.add(camera);
 var whiteLight = new THREE.PointLight(0xffffff);
@@ -36,15 +42,62 @@ container.appendChild(renderer.domElement);
 
 var cubes = addAllCubes(len, 0.4);
 
-start.addEventListener('click', evolve.bind(this,cubes,keepAlive,makeAlive));
+start.addEventListener('click', function() {
+	var then = Date.now();
+	var keepAlive = [+keepAliveMin.value, +keepAliveMax.value];
+	var makeAlive = [+makeAliveMin.value, +makeAliveMax.value];
+	console.log(keepAlive, makeAlive);
+	evolve(cubes, keepAlive, makeAlive);
+
+	function evolve(cubes, keepAliveVals, makeAliveVals) {
+		requestAnimationFrame(evolve.bind(this,cubes,keepAliveVals,makeAliveVals));
+
+		var interval = 2000;
+		var now = Date.now();
+		var delta = now - then;
+		if (delta > interval) {
+
+			then = now - delta % interval;
+
+			var newStatus = getEvolveStatuses(cubes, keepAliveVals, makeAliveVals);
+			for (var i = 0; i < cubes.length; i++) {
+				for (var j = 0; j < cubes.length; j++) {
+					for (var k = 0; k < cubes.length; k++) {
+						var cube = cubes[i][j][k];
+						cube.userData.isAlive = newStatus[i][j][k];
+						cube.material.opacity = +cube.userData.isAlive / 2;
+					}
+				}
+			}
+		}
+	}
+
+});
 
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+render();
+
+keepAliveMin.addEventListener('input', function(e) {
+	keepAliveMinVal.innerText = e.target.value;
+});
+
+keepAliveMax.addEventListener('input', function(e) {
+	keepAliveMaxVal.innerText = e.target.value;
+});
+
+makeAliveMin.addEventListener('input', function(e) {
+	makeAliveMinVal.innerText = e.target.value;
+});
+
+makeAliveMax.addEventListener('input', function(e) {
+	makeAliveMaxVal.innerText = e.target.value;
+});
 
 function render() {
 	requestAnimationFrame(render);
 	renderer.render(scene, camera);
 }
-render();
 
 function addAllCubes(len, lifeProbability) {
 	var cubes = [];
@@ -91,29 +144,6 @@ function livingNeighborCount(coords, cubes) {
 		}
 	}
 	return numAlive;
-}
-
-function evolve(cubes, keepAliveVals, makeAliveVals) {
-	requestAnimationFrame(evolve.bind(this,cubes,keepAliveVals,makeAliveVals));
-
-	var interval = 2000;
-	var now = Date.now();
-	var delta = now - then;
-	if (delta > interval) {
-
-		then = now - delta % interval;
-
-		var newStatus = getEvolveStatuses(cubes, keepAliveVals, makeAliveVals);
-		for (var i = 0; i < cubes.length; i++) {
-			for (var j = 0; j < cubes.length; j++) {
-				for (var k = 0; k < cubes.length; k++) {
-					var cube = cubes[i][j][k];
-					cube.userData.isAlive = newStatus[i][j][k];
-					cube.material.opacity = +cube.userData.isAlive / 2;
-				}
-			}
-		}
-	}
 }
 
 function setAlive(coords, aliveVals, cubes) {

@@ -12,12 +12,21 @@
 		<p>In each generation, whether a cube lives or dies depends on how many neighbors it has.</p>
 		<p>Here's the breakdown:</p>
 		<ol>
-			<li>If a cube has between <span class="keep-alive-min">2</span> and <span class="keep-alive-max">3</span> neighbors, it stays alive to the next generation. Otherwise it dies (by over- or underpopulation.)</li>
-			<li>If an empty cell has between <span class="make-alive-min">3</span> and <span class="make-alive-max">3</span> neighbors, it becomes alive in the next generation (by reproduction).</li>
+			<li>If a cube has between <span id="keep-alive-min-val">2</span> and <span id="keep-alive-max-val">3</span> neighbors, it stays alive to the next generation. Otherwise it dies (by over- or underpopulation.)</li>
+			<li>If an empty cell has between <span id="make-alive-min-val">3</span> and <span id="make-alive-max-val">3</span> neighbors, it becomes alive in the next generation (by reproduction).</li>
 		</ol>
-		<p>Use the sliders below to adjust these initial parameters. Then use the buttons to set an initial state and watch the system evolve!</p>
+		<p>Use the inputs below to adjust these initial parameters. Then use the buttons to set an initial state and watch the system evolve!</p>
+		<div>
+			<input type="number" id="keep-alive-min" min="0" max="26" value="2">
+			<input type="number" id="keep-alive-max" min="0" max="26" value="3">
+		</div>
+		<div>
+			<input type="number" id="make-alive-min" min="0" max="26" value="3">
+			<input type="number" id="make-alive-max" min="0" max="26" value="3">
+		</div>
 		<button id="start">Start</button>
 		<small>Based on Jon Conway's <a href="https://en.wikipedia.org/wiki/Conway's_Game_of_Life" target="_blank">2D Game of Life</a>.</small>
+
 	</aside>
 	<div id="main"></div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r83/three.js"></script>
