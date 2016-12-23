@@ -1,4 +1,6 @@
-var width = window.innerWidth;
+var container = document.getElementById("main");
+var start = document.getElementById("start");
+var width = container.offsetWidth;
 var height = window.innerHeight;
 var viewAngle = 45;
 var aspect = width / height;
@@ -7,8 +9,8 @@ var far = 10000;
 var min = -25;
 var max = 25;
 var len = 12;
-var keepAlive = [3, 6]
-var makeAlive = [10, 20];
+var keepAlive = [3, 6];
+var makeAlive = [3, 6];
 var then = Date.now();
 
 var scene = new THREE.Scene();
@@ -21,7 +23,7 @@ var camera =
 		near,
 		far
 	);
-camera.position.set(12,20,-14);
+camera.position.set(18,30,-21);
 scene.add(camera);
 var whiteLight = new THREE.PointLight(0xffffff);
 whiteLight.position.set(0, 100, 0);
@@ -30,12 +32,10 @@ scene.add(whiteLight);
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(width, height);
 
-var container = document.getElementById("main");
 container.appendChild(renderer.domElement);
 
 var cubes = addAllCubes(len, 0.4);
 
-var start = document.getElementById("start");
 start.addEventListener('click', evolve.bind(this,cubes,keepAlive,makeAlive));
 
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -47,7 +47,7 @@ function render() {
 render();
 
 function addAllCubes(len, lifeProbability) {
-	var cubes = []
+	var cubes = [];
 	for (var i=0;i<len;i++) {
 		var cubePlane = [];
 		for (var j=0;j<len;j++) {
@@ -103,7 +103,7 @@ function evolve(cubes, keepAliveVals, makeAliveVals) {
 
 		then = now - delta % interval;
 
-		var newStatus = getEvolveStatuses(cubes, keepAliveVals, makeAliveVals)
+		var newStatus = getEvolveStatuses(cubes, keepAliveVals, makeAliveVals);
 		for (var i = 0; i < cubes.length; i++) {
 			for (var j = 0; j < cubes.length; j++) {
 				for (var k = 0; k < cubes.length; k++) {

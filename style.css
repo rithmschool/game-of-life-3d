@@ -1,3 +1,19 @@
 body {
 	margin: 0;
+	display: flex;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+aside {
+	width: 25%;
+	background-color: rgba(0,0,0,0.5);
+	padding: 10px;
+}
+
+aside > h2 {
+	text-align: center;
+}
+
+#main {
+	width: 75%;
 }
