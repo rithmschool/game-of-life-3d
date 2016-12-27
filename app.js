@@ -1,5 +1,6 @@
 var container = document.getElementById("main");
 var start = document.getElementById("start");
+var newBoard = document.getElementById("new-board");
 var width = container.offsetWidth;
 var height = window.innerHeight;
 var viewAngle = 45;
@@ -9,14 +10,16 @@ var far = 10000;
 var min = -25;
 var max = 25;
 var len = 12;
-var keepAliveMin    = document.getElementById("keep-alive-min");
-var keepAliveMax    = document.getElementById("keep-alive-max");
-var makeAliveMin    = document.getElementById("make-alive-min");
-var makeAliveMax    = document.getElementById("make-alive-max");
-var keepAliveMinVal = document.getElementById("keep-alive-min-val");
-var keepAliveMaxVal = document.getElementById("keep-alive-max-val");
-var makeAliveMinVal = document.getElementById("make-alive-min-val");
-var makeAliveMaxVal = document.getElementById("make-alive-max-val");
+var keepAliveMin       = document.getElementById("keep-alive-min");
+var keepAliveMax       = document.getElementById("keep-alive-max");
+var makeAliveMin       = document.getElementById("make-alive-min");
+var makeAliveMax       = document.getElementById("make-alive-max");
+var lifeProbability    = document.getElementById("life-probability");
+var lifeProbabilityVal = document.getElementById("life-probability-val");
+
+lifeProbability.addEventListener('input', function(e) {
+	lifeProbabilityVal.innerText = e.target.value + "%";
+})
 
 var scene = new THREE.Scene();
 scene.background = new THREE.Color(0xFFFFFF);
@@ -40,13 +43,19 @@ renderer.setSize(width, height);
 
 container.appendChild(renderer.domElement);
 
-var cubes = addAllCubes(len, 0.4);
+var cubes = generateCubes(len);
+
+setRandomInitialLifeState(cubes, +lifeProbability.value / 100);
+
+newBoard.addEventListener('click', function() {
+	setRandomInitialLifeState(cubes, +lifeProbability.value / 100);
+});
 
 start.addEventListener('click', function() {
 	var then = Date.now();
 	var keepAlive = [+keepAliveMin.value, +keepAliveMax.value];
 	var makeAlive = [+makeAliveMin.value, +makeAliveMax.value];
-	console.log(keepAlive, makeAlive);
+	
 	evolve(cubes, keepAlive, makeAlive);
 
 	function evolve(cubes, keepAliveVals, makeAliveVals) {
@@ -78,28 +87,12 @@ var controls = new THREE.OrbitControls(camera, renderer.domElement);
 
 render();
 
-keepAliveMin.addEventListener('input', function(e) {
-	keepAliveMinVal.innerText = e.target.value;
-});
-
-keepAliveMax.addEventListener('input', function(e) {
-	keepAliveMaxVal.innerText = e.target.value;
-});
-
-makeAliveMin.addEventListener('input', function(e) {
-	makeAliveMinVal.innerText = e.target.value;
-});
-
-makeAliveMax.addEventListener('input', function(e) {
-	makeAliveMaxVal.innerText = e.target.value;
-});
-
 function render() {
 	requestAnimationFrame(render);
 	renderer.render(scene, camera);
 }
 
-function addAllCubes(len, lifeProbability) {
+function generateCubes(len) {
 	var cubes = [];
 	for (var i=0;i<len;i++) {
 		var cubePlane = [];
@@ -107,7 +100,7 @@ function addAllCubes(len, lifeProbability) {
 			var cubeRow = [];
 			for (var k=0;k<len;k++) {
 				var isAlive = Math.random() < lifeProbability;
-				cubeRow.push(addCube([i - len/2,j - len/2,k - len/2], isAlive));
+				cubeRow.push(addCube([i - len/2,j - len/2,k - len/2]));
 			}
 			cubePlane.push(cubeRow);
 		}
@@ -116,18 +109,31 @@ function addAllCubes(len, lifeProbability) {
 	return cubes;
 }
 
-function addCube(coordinates, isAlive) {
+function addCube(coordinates) {
 	var geometry = new THREE.BoxGeometry(1,1,1);
  	var material = new THREE.MeshLambertMaterial({
  		color: 0x00ff00,
- 		transparent: true,
- 		opacity: +isAlive / 2
+ 		transparent: true
  	});
 	var cube = new THREE.Mesh(geometry, material);
 	cube.position.set.apply(cube.position,coordinates);
-	cube.userData.isAlive = isAlive;
 	scene.add(cube);
 	return cube;
+}
+
+function setLifeStatus(cube, isAlive) {
+	cube.userData.isAlive = isAlive;
+	cube.material.opacity = +cube.userData.isAlive / 2;
+}
+
+function setRandomInitialLifeState(cubes, lifeProbability) {
+	for (var i = 0; i < cubes.length; i++) {
+		for (var j = 0; j < cubes.length; j++) {
+			for (var k = 0; k < cubes.length; k++) {
+				setLifeStatus(cubes[i][j][k], Math.random() < lifeProbability);
+			}
+		}
+	}
 }
 
 function livingNeighborCount(coords, cubes) {
