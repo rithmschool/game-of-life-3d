@@ -16,11 +16,40 @@ var makeAliveMin       = document.getElementById("make-alive-min");
 var makeAliveMax       = document.getElementById("make-alive-max");
 var lifeProbability    = document.getElementById("life-probability");
 var lifeProbabilityVal = document.getElementById("life-probability-val");
+var layer 			   = document.getElementById("layer");
+var layerVal 		   = document.getElementById("layer-val");
+var gameModeOptions    = document.querySelectorAll("input[type='radio']");
 var mouse = new THREE.Vector2();
+var gameMode = 'random';
 
 lifeProbability.addEventListener('input', function(e) {
 	lifeProbabilityVal.innerText = e.target.value + "%";
-})
+});
+
+layer.addEventListener('input', function(e) {
+	layerVal.innerText = e.target.value;
+	setManualInitialLifeState(cubes, +e.target.value);
+});
+
+gameModeOptions.forEach(function(gameModeInput) {
+	gameModeInput.addEventListener('click', function(e) {
+		var newGameMode = e.target.value;
+
+		
+		if (gameMode !== newGameMode) {
+			document.getElementById(gameMode).style.display = "none";
+			document.getElementById(newGameMode).style.display = "block";
+			if (newGameMode === "random") {
+				setRandomInitialLifeState(cubes, +lifeProbability.value / 100);
+			} else {
+				setManualInitialLifeState(cubes, 0);
+			}
+		}
+
+		gameMode = newGameMode;
+
+	});
+});
 
 var scene = new THREE.Scene();
 scene.background = new THREE.Color(0xFFFFFF);
@@ -164,6 +193,31 @@ function setRandomInitialLifeState(cubes, lifeProbability) {
 	}
 }
 
+// manual stuff
+
+function setManualInitialLifeState(cubes, layer) {
+	for (var i = 0; i < cubes.length; i++) {
+		for (var j = 0; j < cubes.length; j++) {
+			for (var k = 0; k < cubes.length; k++) {
+				setLifeStatus(cubes[i][j][k], inLayer(i, j, k, layer, cubes.length));
+			}
+		}
+	}
+}
+
+function inLayer(x,y,z,layerId, len) {
+	var lower = layerId;
+	var upper = len - layerId - 1;
+	var xSides = (x === lower || x === upper) && between(y, lower, upper) && between(z, lower, upper);
+	var ySides = (y === lower || y === upper) && between(x, lower, upper) && between(z, lower, upper);
+	var zSides = (z === lower || z === upper) && between(x, lower, upper) && between(y, lower, upper)  
+	return xSides || ySides || zSides;
+}
+
+function between(x,a,b) {
+	return a <= x && x <= b;    
+}
+
 // evolution / neighbor stuff
 
 function livingNeighborCount(coords, cubes) {
@@ -180,6 +234,19 @@ function livingNeighborCount(coords, cubes) {
 		}
 	}
 	return numAlive;
+}
+
+function inLayer(x,y,z,layerId, len) {
+	var lower = layerId;
+	var upper = len - layerId - 1;
+	var xSides = (x === lower || x === upper) && between(y, lower, upper) && between(z, lower, upper);
+	var ySides = (y === lower || y === upper) && between(x, lower, upper) && between(z, lower, upper);
+	var zSides = (z === lower || z === upper) && between(x, lower, upper) && between(y, lower, upper); 
+	return xSides || ySides || zSides;
+}
+
+function between(x,a,b) {
+	return a <= x && x <= b;    
 }
 
 function setAlive(coords, aliveVals, cubes) {

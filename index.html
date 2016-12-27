@@ -16,9 +16,22 @@
 			<li>If an empty cell has between <input type="number" id="make-alive-min" min="0" max="26" value="3"> and <input type="number" id="make-alive-max" min="0" max="26" value="3"> neighbors, it becomes alive in the next generation (by reproduction).</li>
 		</ol>
 		<p>Use the inputs below to adjust these initial parameters. Then use the buttons to set an initial state and watch the system evolve!</p>
-		<p>Probability that a cube starts out as living: <span id="life-probability-val">30%</span></p>
-		<input id="life-probability" type="range" min="0" max="100" step="1" value="30">
-		<button id="new-board">Generate new board</button>
+		<p>
+			Game Mode:
+			<label for="">Random</label>
+			<input type="radio" value="random" name="game-mode" checked>
+			<label for="">Manual</label>
+			<input type="radio" value="manual" name="game-mode">
+		</p>
+		<div id="random">
+			<p>Probability that a cube starts out as living: <span id="life-probability-val">30%</span></p>
+			<input id="life-probability" type="range" min="0" max="100" step="1" value="30">
+			<button id="new-board">Generate new board</button>
+		</div>
+		<div id="manual">
+			<p>Layer: <span id="layer-val">0</span></p>
+			<input id="layer" type="range" min="0" max="5" step="1" value="0">
+		</div>
 		<button id="start">Start</button>
 		<small>Based on Jon Conway's <a href="https://en.wikipedia.org/wiki/Conway's_Game_of_Life" target="_blank">2D Game of Life</a>.</small>
 
