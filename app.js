@@ -123,25 +123,26 @@ render();
 function render() {
 	requestAnimationFrame(render);
 
-	raycaster.setFromCamera( mouse, camera );
-
-	var intersects = raycaster.intersectObjects( scene.children.slice(2) );
-	if (intersects.length > 0) {
-		if (intersected !== intersects[0].object) {
-			if (intersected) {
+	if (gameMode === "manual") {
+		raycaster.setFromCamera( mouse, camera );
+		var intersects = raycaster.intersectObjects( scene.children.slice(2) );
+		if (intersects.length > 0) {
+			if (intersected !== intersects[0].object) {
+				if (intersected) {
+					intersected.material.color = new THREE.Color(0xffff00);
+					intersected.material.opacity = +intersected.userData.isAlive / 2;
+				}
+				intersected = intersects[0].object;
 				intersected.material.color = new THREE.Color(0x00ff00);
+				intersected.material.opacity = 1;
+			}
+		} else {
+			if (intersected) {
+				intersected.material.color = new THREE.Color(0xffff00);
 				intersected.material.opacity = +intersected.userData.isAlive / 2;
 			}
-			intersected = intersects[0].object;
-			intersected.material.color = new THREE.Color(0xff0000);
-			intersected.material.opacity = 1;
+			intersected = null;
 		}
-	} else {
-		if (intersected) {
-			intersected.material.color = new THREE.Color(0x00ff00);
-			intersected.material.opacity = +intersected.userData.isAlive / 2;
-		}
-		intersected = null;
 	}
 
 	renderer.render(scene, camera);
@@ -178,16 +179,19 @@ function addCube(coordinates) {
 	return cube;
 }
 
-function setLifeStatus(cube, isAlive) {
+function setLifeStatus(cube, isAlive, color) {
 	cube.userData.isAlive = isAlive;
 	cube.material.opacity = +cube.userData.isAlive / 2;
+	if (color) {
+		cube.material.color = new THREE.Color(color);
+	}
 }
 
 function setRandomInitialLifeState(cubes, lifeProbability) {
 	for (var i = 0; i < cubes.length; i++) {
 		for (var j = 0; j < cubes.length; j++) {
 			for (var k = 0; k < cubes.length; k++) {
-				setLifeStatus(cubes[i][j][k], Math.random() < lifeProbability);
+				setLifeStatus(cubes[i][j][k], Math.random() < lifeProbability, 0x00ff00);
 			}
 		}
 	}
@@ -199,7 +203,7 @@ function setManualInitialLifeState(cubes, layer) {
 	for (var i = 0; i < cubes.length; i++) {
 		for (var j = 0; j < cubes.length; j++) {
 			for (var k = 0; k < cubes.length; k++) {
-				setLifeStatus(cubes[i][j][k], inLayer(i, j, k, layer, cubes.length));
+				setLifeStatus(cubes[i][j][k], inLayer(i, j, k, layer, cubes.length), 0xffff00);
 			}
 		}
 	}
