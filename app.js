@@ -16,6 +16,7 @@ var makeAliveMin       = document.getElementById("make-alive-min");
 var makeAliveMax       = document.getElementById("make-alive-max");
 var lifeProbability    = document.getElementById("life-probability");
 var lifeProbabilityVal = document.getElementById("life-probability-val");
+var mouse = new THREE.Vector2();
 
 lifeProbability.addEventListener('input', function(e) {
 	lifeProbabilityVal.innerText = e.target.value + "%";
@@ -37,7 +38,7 @@ scene.add(camera);
 var whiteLight = new THREE.PointLight(0xffffff);
 whiteLight.position.set(0, 100, 0);
 scene.add(whiteLight);
-
+var raycaster = new THREE.Raycaster();
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(width, height);
 
@@ -83,14 +84,41 @@ start.addEventListener('click', function() {
 
 });
 
+main.addEventListener('mousemove', onDocumentMouseMove, false);
+
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
+var intersected = null;
 
 render();
 
 function render() {
 	requestAnimationFrame(render);
+
+	raycaster.setFromCamera( mouse, camera );
+
+	var intersects = raycaster.intersectObjects( scene.children.slice(2) );
+	if (intersects.length > 0) {
+		if (intersected !== intersects[0].object) {
+			if (intersected) {
+				intersected.material.color = new THREE.Color(0x00ff00);
+				intersected.material.opacity = +intersected.userData.isAlive / 2;
+			}
+			intersected = intersects[0].object;
+			intersected.material.color = new THREE.Color(0xff0000);
+			intersected.material.opacity = 1;
+		}
+	} else {
+		if (intersected) {
+			intersected.material.color = new THREE.Color(0x00ff00);
+			intersected.material.opacity = +intersected.userData.isAlive / 2;
+		}
+		intersected = null;
+	}
+
 	renderer.render(scene, camera);
 }
+
+// cube stuff
 
 function generateCubes(len) {
 	var cubes = [];
@@ -136,6 +164,8 @@ function setRandomInitialLifeState(cubes, lifeProbability) {
 	}
 }
 
+// evolution / neighbor stuff
+
 function livingNeighborCount(coords, cubes) {
 	var numAlive = cubes[coords[0]][coords[1]][coords[2]].userData.isAlive ? -1 : 0;
 	for (var i = coords[0] - 1; i <= coords[0] + 1; i++) {
@@ -167,3 +197,17 @@ function getEvolveStatuses(cubes, keepAliveVals, makeAliveVals) {
 		});
 	});
 }
+
+// intersection stuff
+
+function onDocumentMouseMove(evt) {
+	mouse.x =   ( ( evt.clientX + width - window.innerWidth ) / width  ) * 2 - 1;
+	mouse.y = - ( evt.clientY / window.innerHeight ) * 2 + 1;
+}
+
+// TODO
+// pause / unpause
+// reset
+// create board manually
+// clean up UI
+// refactor EVERYTHING
