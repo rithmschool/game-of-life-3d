@@ -12,8 +12,8 @@
 		<p>In each generation, whether a cube lives or dies depends on how many neighbors it has.</p>
 		<p>Here's the breakdown:</p>
 		<ol>
-			<li>If a cube has between <input type="number" id="keep-alive-min" min="0" max="26" value="2"> and <input type="number" id="keep-alive-max" min="0" max="26" value="3"> neighbors, it stays alive to the next generation. Otherwise it dies (by over- or underpopulation.)</li>
-			<li>If an empty cell has between <input type="number" id="make-alive-min" min="0" max="26" value="3"> and <input type="number" id="make-alive-max" min="0" max="26" value="3"> neighbors, it becomes alive in the next generation (by reproduction).</li>
+			<li>If a cube has between <input type="number" id="keep-alive-min" min="0" max="26" value="4"> and <input type="number" id="keep-alive-max" min="0" max="26" value="5"> neighbors, it stays alive to the next generation. Otherwise it dies (by over- or underpopulation.)</li>
+			<li>If an empty cell has between <input type="number" id="make-alive-min" min="0" max="26" value="5"> and <input type="number" id="make-alive-max" min="0" max="26" value="5"> neighbors, it becomes alive in the next generation (by reproduction).</li>
 		</ol>
 		<p>Use the inputs below to adjust these initial parameters. Then use the buttons to set an initial state and watch the system evolve!</p>
 		<p>
@@ -29,8 +29,8 @@
 			<button id="new-board">Generate new board</button>
 		</div>
 		<div id="manual">
-			<p>Layer: <span id="layer-val">0</span></p>
-			<input id="layer" type="range" min="0" max="5" step="1" value="0">
+			<p>Layer: <span id="layer-val">5</span></p>
+			<input id="layer" type="range" min="0" max="5" step="1" value="5">
 		</div>
 		<button id="start">Start</button>
 		<small>Based on Jon Conway's <a href="https://en.wikipedia.org/wiki/Conway's_Game_of_Life" target="_blank">2D Game of Life</a>.</small>

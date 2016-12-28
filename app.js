@@ -21,6 +21,7 @@ var layerVal 		   = document.getElementById("layer-val");
 var gameModeOptions    = document.querySelectorAll("input[type='radio']");
 var mouse = new THREE.Vector2();
 var gameMode = 'random';
+var playing = false;
 
 lifeProbability.addEventListener('input', function(e) {
 	lifeProbabilityVal.innerText = e.target.value + "%";
@@ -82,12 +83,14 @@ newBoard.addEventListener('click', function() {
 });
 
 start.addEventListener('click', function() {
+	playing = true;
 	var then = Date.now();
 	var keepAlive = [+keepAliveMin.value, +keepAliveMax.value];
 	var makeAlive = [+makeAliveMin.value, +makeAliveMax.value];
 
 	if (gameMode === "manual") {
-		setManualInitialLifeState(cubes, -1);
+		setManualInitialLifeState(cubes, -1, 0x00ff00);
+
 	}
 	
 	evolve(cubes, keepAlive, makeAlive);
@@ -128,7 +131,7 @@ render();
 function render() {
 	requestAnimationFrame(render);
 
-	if (gameMode === "manual") {
+	if (gameMode === "manual" && !playing) {
 		raycaster.setFromCamera( mouse, camera );
 		var layerCubes = scene.children.filter(function(child) { 
 			var x = child.position.x + len / 2;
@@ -233,7 +236,7 @@ function setRandomInitialLifeState(cubes, lifeProbability) {
 
 // manual stuff
 
-function setManualInitialLifeState(cubes, layer) {
+function setManualInitialLifeState(cubes, layer, color) {
 	for (var i = 0; i < cubes.length; i++) {
 		for (var j = 0; j < cubes.length; j++) {
 			for (var k = 0; k < cubes.length; k++) {
@@ -243,7 +246,7 @@ function setManualInitialLifeState(cubes, layer) {
 						inPurgatory: inPurgatory
 					}, {
 						opacity: +inPurgatory / 5,
-						color: new THREE.Color(0xffff00)
+						color: new THREE.Color(color || 0xffff00)
 					});
 				}
 			}
