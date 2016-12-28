@@ -1,6 +1,7 @@
 var container = document.getElementById("main");
 var start = document.getElementById("start");
 var reset = document.getElementById("reset");
+var exampleList = document.getElementById("examples");
 var width = container.offsetWidth;
 var height = window.innerHeight;
 var viewAngle = 45;
@@ -26,6 +27,7 @@ var gameMode = 'random';
 var playing = false;
 var interval = 2000;
 
+
 lifeProbability.addEventListener('input', function(e) {
 	lifeProbabilityVal.innerText = e.target.value + "%";
 });
@@ -38,7 +40,14 @@ layer.addEventListener('input', function(e) {
 time.addEventListener('input', function(e) {
 	timeVal.innerText = e.target.value;
 	interval = +e.target.value * 1000;
-})
+});
+
+exampleList.addEventListener('click', function(e) {
+	if (e.target.tagName === "LI") {
+		setRandomInitialLifeState(cubes, 0);
+		setGameState(examples[e.target.innerText.toLowerCase()]);
+	}
+});
 
 gameModeOptions.forEach(function(gameModeInput) {
 	gameModeInput.addEventListener('click', function(e) {
@@ -139,7 +148,7 @@ start.addEventListener('click', function(e) {
 });
 
 main.addEventListener('mousemove', onDocumentMouseMove);
-main.addEventListener('click', toggleIntersect);
+main.addEventListener('mousedown', toggleIntersect);
 
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
 var intersected = null;
@@ -226,7 +235,7 @@ function addCube(coordinates) {
 	return cube;
 }
 
-function setStatus(cube, userDataOptions, materialOptions) {
+function setCubeState(cube, userDataOptions, materialOptions) {
 	for (var option in userDataOptions) {
 		cube.userData[option] = userDataOptions[option];
 	}
@@ -240,7 +249,7 @@ function setRandomInitialLifeState(cubes, lifeProbability) {
 		for (var j = 0; j < cubes.length; j++) {
 			for (var k = 0; k < cubes.length; k++) {
 				var isAlive = Math.random() < lifeProbability;
-				setStatus(cubes[i][j][k], {
+				setCubeState(cubes[i][j][k], {
 					isAlive: isAlive,
 					inPurgatory: false
 				}, {
@@ -260,7 +269,7 @@ function setManualInitialLifeState(cubes, layer, color) {
 			for (var k = 0; k < cubes.length; k++) {
 				if (!cubes[i][j][k].userData.isAlive) {
 					var inPurgatory = inLayer(i, j, k, layer, cubes.length);
-					setStatus(cubes[i][j][k], {
+					setCubeState(cubes[i][j][k], {
 						inPurgatory: inPurgatory
 					}, {
 						opacity: +inPurgatory / 5,
@@ -288,7 +297,7 @@ function between(x,a,b) {
 function toggleIntersect() {
 	if (intersected) {
 		var newLifeStatus = !intersected.userData.isAlive;
-		setStatus(intersected, {
+		setCubeState(intersected, {
 			isAlive: newLifeStatus,
 			inPurgatory: !newLifeStatus
 		}, {
@@ -330,6 +339,30 @@ function getEvolveStatuses(cubes, keepAliveVals, makeAliveVals) {
 			});
 		});
 	});
+}
+
+// curated initial state stuff
+
+function setGameState(stateObj) {
+	keepAliveMin.value = stateObj.keepAlive[0];
+	keepAliveMax.value = stateObj.keepAlive[1];
+	makeAliveMin.value = stateObj.makeAlive[0];
+	makeAliveMax.value = stateObj.makeAlive[1];
+
+	setRandomInitialLifeState(cubes, 0);
+
+	for (var i = 0; i < stateObj.coords.length; i++) {
+		var x = stateObj.coords[i][0]
+		var y = stateObj.coords[i][1]
+		var z = stateObj.coords[i][2]
+		setCubeState(cubes[x][y][z], {
+			isAlive: true,
+			inPurgatory: false
+		}, {
+			opacity: 0.5,
+			color: new THREE.Color(0x00ff00)
+		});
+	}
 }
 
 // intersection stuff
