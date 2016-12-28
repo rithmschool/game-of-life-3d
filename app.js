@@ -373,6 +373,5 @@ function onDocumentMouseMove(evt) {
 }
 
 // TODO
-// examples
 // clean up UI
 // refactor EVERYTHING
