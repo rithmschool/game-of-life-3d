@@ -1,6 +1,6 @@
 var container = document.getElementById("main");
 var start = document.getElementById("start");
-var newBoard = document.getElementById("new-board");
+var reset = document.getElementById("reset");
 var width = container.offsetWidth;
 var height = window.innerHeight;
 var viewAngle = 45;
@@ -18,10 +18,13 @@ var lifeProbability    = document.getElementById("life-probability");
 var lifeProbabilityVal = document.getElementById("life-probability-val");
 var layer 			   = document.getElementById("layer");
 var layerVal 		   = document.getElementById("layer-val");
+var time 		   	   = document.getElementById("time");
+var timeVal 		   = document.getElementById("time-val");
 var gameModeOptions    = document.querySelectorAll("input[type='radio']");
 var mouse = new THREE.Vector2();
 var gameMode = 'random';
 var playing = false;
+var interval = 2000;
 
 lifeProbability.addEventListener('input', function(e) {
 	lifeProbabilityVal.innerText = e.target.value + "%";
@@ -31,6 +34,11 @@ layer.addEventListener('input', function(e) {
 	layerVal.innerText = e.target.value;
 	setManualInitialLifeState(cubes, +e.target.value);
 });
+
+time.addEventListener('input', function(e) {
+	timeVal.innerText = e.target.value;
+	interval = +e.target.value * 1000;
+})
 
 gameModeOptions.forEach(function(gameModeInput) {
 	gameModeInput.addEventListener('click', function(e) {
@@ -78,31 +86,41 @@ var cubes = generateCubes(len);
 
 setRandomInitialLifeState(cubes, +lifeProbability.value / 100);
 
-newBoard.addEventListener('click', function() {
-	setRandomInitialLifeState(cubes, +lifeProbability.value / 100);
+reset.addEventListener('click', function() {
+	playing = false;
+	start.innerText = "Play";
+	if (gameMode === "random") {
+		setRandomInitialLifeState(cubes, +lifeProbability.value / 100);
+	} else {
+		setRandomInitialLifeState(cubes, 0);
+		layer.value = 0;
+		layerVal.innerText = 0;
+		setManualInitialLifeState(cubes, +layer.value);
+	}
 });
 
-start.addEventListener('click', function() {
-	playing = true;
+start.addEventListener('click', function(e) {
+	playing = !playing;
 	var then = Date.now();
 	var keepAlive = [+keepAliveMin.value, +keepAliveMax.value];
 	var makeAlive = [+makeAliveMin.value, +makeAliveMax.value];
 
 	if (gameMode === "manual") {
 		setManualInitialLifeState(cubes, -1, 0x00ff00);
-
 	}
 	
+	e.target.innerText = playing ? "Pause" : "Play"
+
 	evolve(cubes, keepAlive, makeAlive);
 
 	function evolve(cubes, keepAliveVals, makeAliveVals) {
+		if (!playing) return
+
 		requestAnimationFrame(evolve.bind(this,cubes,keepAliveVals,makeAliveVals));
 
-		var interval = 2000;
 		var now = Date.now();
 		var delta = now - then;
 		if (delta > interval) {
-
 			then = now - delta % interval;
 
 			var newStatus = getEvolveStatuses(cubes, keepAliveVals, makeAliveVals);
@@ -255,8 +273,8 @@ function setManualInitialLifeState(cubes, layer, color) {
 }
 
 function inLayer(x,y,z,layerId, len) {
-	var lower = layerId;
-	var upper = len - layerId - 1;
+	var lower = len / 2 - 1 - layerId;
+	var upper = len /2 + layerId;
 	var xSides = (x === lower || x === upper) && between(y, lower, upper) && between(z, lower, upper);
 	var ySides = (y === lower || y === upper) && between(x, lower, upper) && between(z, lower, upper);
 	var zSides = (z === lower || z === upper) && between(x, lower, upper) && between(y, lower, upper)  
@@ -298,19 +316,6 @@ function livingNeighborCount(coords, cubes) {
 	return numAlive;
 }
 
-function inLayer(x, y, z, layerId, len) {
-	var lower = layerId;
-	var upper = len - layerId - 1;
-	var xSides = (x === lower || x === upper) && between(y, lower, upper) && between(z, lower, upper);
-	var ySides = (y === lower || y === upper) && between(x, lower, upper) && between(z, lower, upper);
-	var zSides = (z === lower || z === upper) && between(x, lower, upper) && between(y, lower, upper); 
-	return xSides || ySides || zSides;
-}
-
-function between(x,a,b) {
-	return a <= x && x <= b;    
-}
-
 function setAlive(coords, aliveVals, cubes) {
 	var nbrs = livingNeighborCount(coords,cubes);
 	return nbrs >= aliveVals[0] && nbrs <= aliveVals[1];
@@ -335,7 +340,6 @@ function onDocumentMouseMove(evt) {
 }
 
 // TODO
-// pause / unpause
-// reset
+// examples
 // clean up UI
 // refactor EVERYTHING
