@@ -35,14 +35,14 @@ gameModeOptions.forEach(function(gameModeInput) {
 	gameModeInput.addEventListener('click', function(e) {
 		var newGameMode = e.target.value;
 
-		
 		if (gameMode !== newGameMode) {
 			document.getElementById(gameMode).style.display = "none";
 			document.getElementById(newGameMode).style.display = "block";
 			if (newGameMode === "random") {
 				setRandomInitialLifeState(cubes, +lifeProbability.value / 100);
 			} else {
-				setManualInitialLifeState(cubes, 0);
+				setRandomInitialLifeState(cubes, 0);
+				setManualInitialLifeState(cubes, +layer.value);
 			}
 		}
 
@@ -85,6 +85,10 @@ start.addEventListener('click', function() {
 	var then = Date.now();
 	var keepAlive = [+keepAliveMin.value, +keepAliveMax.value];
 	var makeAlive = [+makeAliveMin.value, +makeAliveMax.value];
+
+	if (gameMode === "manual") {
+		setManualInitialLifeState(cubes, -1);
+	}
 	
 	evolve(cubes, keepAlive, makeAlive);
 
@@ -113,7 +117,8 @@ start.addEventListener('click', function() {
 
 });
 
-main.addEventListener('mousemove', onDocumentMouseMove, false);
+main.addEventListener('mousemove', onDocumentMouseMove);
+main.addEventListener('click', toggleIntersect);
 
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
 var intersected = null;
@@ -125,21 +130,43 @@ function render() {
 
 	if (gameMode === "manual") {
 		raycaster.setFromCamera( mouse, camera );
-		var intersects = raycaster.intersectObjects( scene.children.slice(2) );
+		var layerCubes = scene.children.filter(function(child) { 
+			var x = child.position.x + len / 2;
+			var y = child.position.y + len / 2;
+			var z = child.position.z + len / 2;
+			return inLayer(x, y, z, +layer.value, len);
+		});
+		var intersects = raycaster.intersectObjects( layerCubes );
 		if (intersects.length > 0) {
+			// we have an intersection! 
+			// should highlight cell in color that it will become, with full opacity
 			if (intersected !== intersects[0].object) {
+				// we have a new intersection! make sure to reset the old one.
 				if (intersected) {
-					intersected.material.color = new THREE.Color(0xffff00);
-					intersected.material.opacity = +intersected.userData.isAlive / 2;
+					if (intersected.userData.inPurgatory) {
+						intersected.material.color = new THREE.Color(0xffff00);
+						intersected.material.opacity = 1 / 5;
+					} else {
+						intersected.material.color = new THREE.Color(0x00ff00);
+						intersected.material.opacity = 1 / 2;
+					}
 				}
+				// style the new one.
 				intersected = intersects[0].object;
-				intersected.material.color = new THREE.Color(0x00ff00);
+				var color = intersected.userData.inPurgatory ? 0x00ff00 : 0xffff00;
+				intersected.material.color = new THREE.Color(color);
 				intersected.material.opacity = 1;
 			}
 		} else {
+			// no intersection. reset color of former intersected cube, if it exists.
 			if (intersected) {
-				intersected.material.color = new THREE.Color(0xffff00);
-				intersected.material.opacity = +intersected.userData.isAlive / 2;
+				if (intersected.userData.inPurgatory) {
+					intersected.material.color = new THREE.Color(0xffff00);
+					intersected.material.opacity = 1 / 5;
+				} else {
+					intersected.material.color = new THREE.Color(0x00ff00);
+					intersected.material.opacity = 1 / 2;
+				}
 			}
 			intersected = null;
 		}
@@ -157,7 +184,6 @@ function generateCubes(len) {
 		for (var j=0;j<len;j++) {
 			var cubeRow = [];
 			for (var k=0;k<len;k++) {
-				var isAlive = Math.random() < lifeProbability;
 				cubeRow.push(addCube([i - len/2,j - len/2,k - len/2]));
 			}
 			cubePlane.push(cubeRow);
@@ -179,11 +205,12 @@ function addCube(coordinates) {
 	return cube;
 }
 
-function setLifeStatus(cube, isAlive, color) {
-	cube.userData.isAlive = isAlive;
-	cube.material.opacity = +cube.userData.isAlive / 2;
-	if (color) {
-		cube.material.color = new THREE.Color(color);
+function setStatus(cube, userDataOptions, materialOptions) {
+	for (var option in userDataOptions) {
+		cube.userData[option] = userDataOptions[option];
+	}
+	for (var option in materialOptions) {
+		cube.material[option] = materialOptions[option];
 	}
 }
 
@@ -191,7 +218,14 @@ function setRandomInitialLifeState(cubes, lifeProbability) {
 	for (var i = 0; i < cubes.length; i++) {
 		for (var j = 0; j < cubes.length; j++) {
 			for (var k = 0; k < cubes.length; k++) {
-				setLifeStatus(cubes[i][j][k], Math.random() < lifeProbability, 0x00ff00);
+				var isAlive = Math.random() < lifeProbability;
+				setStatus(cubes[i][j][k], {
+					isAlive: isAlive,
+					inPurgatory: false
+				}, {
+					opacity: +isAlive / 2,
+					color: new THREE.Color(0x00ff00)
+				});
 			}
 		}
 	}
@@ -203,7 +237,15 @@ function setManualInitialLifeState(cubes, layer) {
 	for (var i = 0; i < cubes.length; i++) {
 		for (var j = 0; j < cubes.length; j++) {
 			for (var k = 0; k < cubes.length; k++) {
-				setLifeStatus(cubes[i][j][k], inLayer(i, j, k, layer, cubes.length), 0xffff00);
+				if (!cubes[i][j][k].userData.isAlive) {
+					var inPurgatory = inLayer(i, j, k, layer, cubes.length);
+					setStatus(cubes[i][j][k], {
+						inPurgatory: inPurgatory
+					}, {
+						opacity: +inPurgatory / 5,
+						color: new THREE.Color(0xffff00)
+					});
+				}
 			}
 		}
 	}
@@ -222,7 +264,20 @@ function between(x,a,b) {
 	return a <= x && x <= b;    
 }
 
-// evolution / neighbor stuff
+function toggleIntersect() {
+	if (intersected) {
+		var newLifeStatus = !intersected.userData.isAlive;
+		setStatus(intersected, {
+			isAlive: newLifeStatus,
+			inPurgatory: !newLifeStatus
+		}, {
+			opacity: 1,
+			color: new THREE.Color(newLifeStatus ? 0xffff00 : 0x00ff00)
+		});
+	}
+}
+
+// evolution / neighbor stuff 
 
 function livingNeighborCount(coords, cubes) {
 	var numAlive = cubes[coords[0]][coords[1]][coords[2]].userData.isAlive ? -1 : 0;
@@ -240,7 +295,7 @@ function livingNeighborCount(coords, cubes) {
 	return numAlive;
 }
 
-function inLayer(x,y,z,layerId, len) {
+function inLayer(x, y, z, layerId, len) {
 	var lower = layerId;
 	var upper = len - layerId - 1;
 	var xSides = (x === lower || x === upper) && between(y, lower, upper) && between(z, lower, upper);
@@ -279,6 +334,5 @@ function onDocumentMouseMove(evt) {
 // TODO
 // pause / unpause
 // reset
-// create board manually
 // clean up UI
 // refactor EVERYTHING
