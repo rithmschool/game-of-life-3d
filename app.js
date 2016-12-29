@@ -1,8 +1,8 @@
-var container = document.getElementById("main");
+var main = document.querySelector("main");
 var start = document.getElementById("start");
 var reset = document.getElementById("reset");
 var exampleList = document.getElementById("examples");
-var width = container.offsetWidth;
+var width = main.offsetWidth;
 var height = window.innerHeight;
 var viewAngle = 45;
 var aspect = width / height;
@@ -22,6 +22,7 @@ var layerVal 		   = document.getElementById("layer-val");
 var time 		   	   = document.getElementById("time");
 var timeVal 		   = document.getElementById("time-val");
 var gameModeOptions    = document.querySelectorAll("input[type='radio']");
+var sections 		   = document.querySelectorAll("section > h3");
 var mouse = new THREE.Vector2();
 var gameMode = 'random';
 var playing = false;
@@ -47,6 +48,15 @@ exampleList.addEventListener('click', function(e) {
 		setRandomInitialLifeState(cubes, 0);
 		setGameState(examples[e.target.innerText.toLowerCase()]);
 	}
+});
+
+sections.forEach(function(section) {
+	section.addEventListener('click', function(e) {
+		sections.forEach(function(sectionHeading) {
+			sectionHeading.nextElementSibling.classList.remove("open");
+		});
+		e.target.nextElementSibling.classList.add("open");
+	});
 });
 
 gameModeOptions.forEach(function(gameModeInput) {
@@ -89,7 +99,7 @@ var raycaster = new THREE.Raycaster();
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(width, height);
 
-container.appendChild(renderer.domElement);
+main.appendChild(renderer.domElement);
 
 var cubes = generateCubes(len);
 
