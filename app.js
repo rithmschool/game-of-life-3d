@@ -22,7 +22,7 @@ var layerVal 		   = document.getElementById("layer-val");
 var time 		   	   = document.getElementById("time");
 var timeVal 		   = document.getElementById("time-val");
 var gameModeOptions    = document.querySelectorAll("input[type='radio']");
-var sections 		   = document.querySelectorAll("section > h3");
+var sections 		   = document.querySelectorAll("section > h1");
 var mouse = new THREE.Vector2();
 var gameMode = 'random';
 var playing = false;
@@ -46,7 +46,8 @@ time.addEventListener('input', function(e) {
 exampleList.addEventListener('click', function(e) {
 	if (e.target.tagName === "LI") {
 		setRandomInitialLifeState(cubes, 0);
-		setGameState(examples[e.target.innerText.toLowerCase()]);
+		var exampleName = e.target.innerText.split(" ")[0].toLowerCase()
+		setGameState(examples[exampleName]);
 	}
 });
 

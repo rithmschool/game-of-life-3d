@@ -1,7 +1,7 @@
 body {
 	margin: 0;
 	display: flex;
-	font-family: 'Playfair Display', serif;
+	font-family: 'Crimson Text', serif;
 }
 
 aside {
@@ -42,27 +42,34 @@ aside > section {
 	text-align: center;
 }
 
-aside > section > h3 {
+aside > section > h1 {
 	font-family: 'Montserrat', sans-serif;
 	margin: 0;
-	padding: 1em 0;
+	padding: 0.5em 0;
+	font-size: 1.5em;
 }
 
-aside > section > h3+div {
+aside > section > h1+div {
 	overflow-y: hidden;
 	max-height: 0;
-	transition-property: all;
+	transition-property: max-height;
 	transition-duration: 1s;
 	text-align: justify;
+	padding: 0 10px;
 }
 
 .open {
 	max-height: 500px;
 }
 
-aside > section > h3:hover {
+aside > section > h1:hover,
+#examples li:hover {
 	cursor: pointer;
 	color: #fff;
+}
+
+#examples li {
+	font-size: 1.3em;
 }
 
 main {
