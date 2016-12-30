@@ -14,3 +14,12 @@ Cube.prototype.addTo = function(scene) {
 	scene.add(this);
 	return this;
 }
+
+Cube.prototype.setCubeState = function(userDataState, materialState) {
+	for (var option in userDataState) {
+		this.userData[option] = userDataState[option];
+	}
+	for (var option in materialState) {
+		this.material[option] = materialState[option];
+	}
+}

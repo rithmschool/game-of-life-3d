@@ -22,7 +22,7 @@ Universe.prototype.forEach = function(cb) {
 	for (var i = 0; i < this.cubes.length; i++) {
 		for (var j = 0; j < this.cubes.length; j++) {
 			for (var k = 0; k < this.cubes.length; k++) {
-				cb(this.cubes[i][j][k], [i, j, k]);
+				cb(this.cubes[i][j][k], i, j, k);
 			}
 		}
 	}
@@ -35,7 +35,7 @@ Universe.prototype.map = function(cb) {
 		for (var j = 0; j < len; j++) {
 			var row = [];
 			for (var k = 0; k < len; k++) {
-				row.push(cb(this.cubes[i][j][k], [i, j, k]));
+				row.push(cb(this.cubes[i][j][k], i, j, k));
 			}
 			plane.push(row);
 		}

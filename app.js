@@ -37,7 +37,7 @@ lifeProbability.addEventListener('input', function(e) {
 
 layer.addEventListener('input', function(e) {
 	layerVal.innerText = e.target.value;
-	setManualInitialLifeState(cubes, +e.target.value);
+	setManualInitialLifeState(universe, +e.target.value);
 });
 
 time.addEventListener('input', function(e) {
@@ -47,7 +47,7 @@ time.addEventListener('input', function(e) {
 
 exampleList.addEventListener('click', function(e) {
 	if (e.target.tagName === "LI") {
-		setRandomInitialLifeState(cubes, 0);
+		setRandomInitialLifeState(universe, 0);
 		var exampleName = e.target.innerText.split(" ")[0].toLowerCase()
 		setGameState(examples[exampleName]);
 	}
@@ -75,7 +75,7 @@ sections.forEach(function(section) {
 				}
 			});
 		} else if (section.innerText === "Modes" && gameMode === "manual") {
-			setManualInitialLifeState(cubes, +layer.value);
+			setManualInitialLifeState(universe, +layer.value);
 		}
 	});
 });
@@ -88,10 +88,10 @@ gameModeOptions.forEach(function(gameModeInput) {
 			document.getElementById(gameMode).style.display = "none";
 			document.getElementById(newGameMode).style.display = "block";
 			if (newGameMode === "random") {
-				setRandomInitialLifeState(cubes, +lifeProbability.value / 100);
+				setRandomInitialLifeState(universe, +lifeProbability.value / 100);
 			} else {
-				setRandomInitialLifeState(cubes, 0);
-				setManualInitialLifeState(cubes, +layer.value);
+				setRandomInitialLifeState(universe, 0);
+				setManualInitialLifeState(universe, +layer.value);
 			}
 		}
 
@@ -126,21 +126,21 @@ var universe = new Universe(len);
 universe.addTo(scene);
 var cubes = universe.cubes;
 
-setRandomInitialLifeState(cubes, +lifeProbability.value / 100);
+setRandomInitialLifeState(universe, +lifeProbability.value / 100);
 
 newUniverse.addEventListener('click', function() {
-	setRandomInitialLifeState(cubes, +lifeProbability.value / 100);
+	setRandomInitialLifeState(universe, +lifeProbability.value / 100);
 });
 
 clearUniverse.addEventListener('click', function() {
-	setRandomInitialLifeState(cubes, 0);
-	setManualInitialLifeState(cubes, +layer.value);
+	setRandomInitialLifeState(universe, 0);
+	setManualInitialLifeState(universe, +layer.value);
 });
 
 reset.addEventListener('click', function() {
 	playing = false;
 	start.innerText = "Play";
-	setRandomInitialLifeState(cubes, 0);
+	setRandomInitialLifeState(universe, 0);
 	setGameState({
 		keepAlive: [+keepAliveMin.value, +keepAliveMax.value],
 		makeAlive: [+makeAliveMin.value, +makeAliveMax.value],
@@ -155,7 +155,7 @@ start.addEventListener('click', function(e) {
 	var makeAlive = [+makeAliveMin.value, +makeAliveMax.value];
 
 	if (gameMode === "manual") {
-		setManualInitialLifeState(cubes, -1, 0x00ff00);
+		setManualInitialLifeState(universe, -1, 0x00ff00);
 	}
 	
 	e.target.innerText = playing ? "Pause" : "Play"
@@ -172,7 +172,7 @@ start.addEventListener('click', function(e) {
 		if (delta > interval) {
 			then = now - delta % interval;
 
-			var newStatus = getEvolveStatuses(cubes, keepAliveVals, makeAliveVals);
+			var newStatus = getEvolveStatuses(universe, keepAliveVals, makeAliveVals);
 			for (var i = 0; i < cubes.length; i++) {
 				for (var j = 0; j < cubes.length; j++) {
 					for (var k = 0; k < cubes.length; k++) {
@@ -246,50 +246,33 @@ function render() {
 
 // cube stuff
 
-function setCubeState(cube, userDataOptions, materialOptions) {
-	for (var option in userDataOptions) {
-		cube.userData[option] = userDataOptions[option];
-	}
-	for (var option in materialOptions) {
-		cube.material[option] = materialOptions[option];
-	}
-}
-
-function setRandomInitialLifeState(cubes, lifeProbability) {
-	for (var i = 0; i < cubes.length; i++) {
-		for (var j = 0; j < cubes.length; j++) {
-			for (var k = 0; k < cubes.length; k++) {
-				var isAlive = Math.random() < lifeProbability;
-				setCubeState(cubes[i][j][k], {
-					isAlive: isAlive,
-					inPurgatory: false
-				}, {
-					opacity: +isAlive / 2,
-					color: new THREE.Color(0x00ff00)
-				});
-			}
-		}
-	}
+function setRandomInitialLifeState(universe, lifeProbability) {
+	universe.forEach(function(cube) {
+		var isAlive = Math.random() < lifeProbability;
+		cube.setCubeState({
+			isAlive: isAlive,
+			inPurgatory: false
+		}, {
+			opacity: +isAlive / 2,
+			color: new THREE.Color(0x00ff00)
+		});
+	});
 }
 
 // manual stuff
 
-function setManualInitialLifeState(cubes, layer, color) {
-	for (var i = 0; i < cubes.length; i++) {
-		for (var j = 0; j < cubes.length; j++) {
-			for (var k = 0; k < cubes.length; k++) {
-				if (!cubes[i][j][k].userData.isAlive) {
-					var inPurgatory = inLayer(i, j, k, layer, cubes.length);
-					setCubeState(cubes[i][j][k], {
-						inPurgatory: inPurgatory
-					}, {
-						opacity: +inPurgatory / 5,
-						color: new THREE.Color(color || 0xffff00)
-					});
-				}
-			}
+function setManualInitialLifeState(universe, layer, color) {
+	universe.forEach(function(cube, i, j, k) {
+		if (!cube.userData.isAlive) {
+			var inPurgatory = inLayer(i, j, k, layer, universe.cubes.length);
+			cube.setCubeState({
+				inPurgatory: inPurgatory
+			}, {
+				opacity: +inPurgatory / 5,
+				color: new THREE.Color(color || 0xffff00)
+			});
 		}
-	}
+	})
 }
 
 function inLayer(x,y,z,layerId, len) {
@@ -308,7 +291,7 @@ function between(x,a,b) {
 function toggleIntersect() {
 	if (intersected) {
 		var newLifeStatus = !intersected.userData.isAlive;
-		setCubeState(intersected, {
+		intersected.setCubeState({
 			isAlive: newLifeStatus,
 			inPurgatory: !newLifeStatus
 		}, {
@@ -341,14 +324,10 @@ function setAlive(coords, aliveVals, cubes) {
 	return nbrs >= aliveVals[0] && nbrs <= aliveVals[1];
 }
 
-function getEvolveStatuses(cubes, keepAliveVals, makeAliveVals) {
-	return cubes.map(function(cubePlanes,i) {
-		return cubePlanes.map(function(cubeRows,j) {
-			return cubeRows.map(function(cube,k) {
-				var aliveVals = cube.userData.isAlive ? keepAliveVals : makeAliveVals;
-				return setAlive([i,j,k], aliveVals, cubes);
-			});
-		});
+function getEvolveStatuses(universe, keepAliveVals, makeAliveVals) {
+	return universe.map(function(cube, i, j, k) {
+		var aliveVals = cube.userData.isAlive ? keepAliveVals : makeAliveVals;
+		return setAlive([i,j,k], aliveVals, cubes);
 	});
 }
 
@@ -360,13 +339,13 @@ function setGameState(stateObj) {
 	makeAliveMin.value = stateObj.makeAlive[0];
 	makeAliveMax.value = stateObj.makeAlive[1];
 
-	setRandomInitialLifeState(cubes, 0);
+	setRandomInitialLifeState(universe, 0);
 
 	for (var i = 0; i < stateObj.coords.length; i++) {
 		var x = stateObj.coords[i][0]
 		var y = stateObj.coords[i][1]
 		var z = stateObj.coords[i][2]
-		setCubeState(cubes[x][y][z], {
+		cubes[x][y][z].setCubeState({
 			isAlive: true,
 			inPurgatory: false
 		}, {
