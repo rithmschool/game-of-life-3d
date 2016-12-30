@@ -1,6 +1,8 @@
 var main = document.querySelector("main");
 var start = document.getElementById("start");
 var reset = document.getElementById("reset");
+var newUniverse = document.getElementById("new-universe");
+var clearUniverse = document.getElementById("clear-universe");
 var exampleList = document.getElementById("examples");
 var width = main.offsetWidth;
 var height = window.innerHeight;
@@ -27,7 +29,7 @@ var mouse = new THREE.Vector2();
 var gameMode = 'random';
 var playing = false;
 var interval = 2000;
-
+var initialCubeCoords = [];
 
 lifeProbability.addEventListener('input', function(e) {
 	lifeProbabilityVal.innerText = e.target.value + "%";
@@ -57,6 +59,24 @@ sections.forEach(function(section) {
 			sectionHeading.nextElementSibling.classList.remove("open");
 		});
 		e.target.nextElementSibling.classList.add("open");
+		if (section.innerText === "Play!") {
+			initialCubeCoords = [];
+			scene.children.forEach(function(child) {
+				if (child.userData.isAlive) {
+					initialCubeCoords.push([
+						child.position.x + len / 2,
+						child.position.y + len / 2,
+						child.position.z + len / 2,
+					]);
+				}
+				if (child.userData.inPurgatory) {
+					child.userData.inPurgatory === false;
+					child.material.opacity = 0;
+				}
+			});
+		} else if (section.innerText === "Modes" && gameMode === "manual") {
+			setManualInitialLifeState(cubes, +layer.value);
+		}
 	});
 });
 
@@ -106,17 +126,24 @@ var cubes = generateCubes(len);
 
 setRandomInitialLifeState(cubes, +lifeProbability.value / 100);
 
+newUniverse.addEventListener('click', function() {
+	setRandomInitialLifeState(cubes, +lifeProbability.value / 100);
+});
+
+clearUniverse.addEventListener('click', function() {
+	setRandomInitialLifeState(cubes, 0);
+	setManualInitialLifeState(cubes, +layer.value);
+});
+
 reset.addEventListener('click', function() {
 	playing = false;
 	start.innerText = "Play";
-	if (gameMode === "random") {
-		setRandomInitialLifeState(cubes, +lifeProbability.value / 100);
-	} else {
-		setRandomInitialLifeState(cubes, 0);
-		layer.value = 0;
-		layerVal.innerText = 0;
-		setManualInitialLifeState(cubes, +layer.value);
-	}
+	setRandomInitialLifeState(cubes, 0);
+	setGameState({
+		keepAlive: [+keepAliveMin.value, +keepAliveMax.value],
+		makeAlive: [+makeAliveMin.value, +makeAliveMax.value],
+		coords: initialCubeCoords
+	})
 });
 
 start.addEventListener('click', function(e) {
@@ -168,7 +195,6 @@ render();
 
 function render() {
 	requestAnimationFrame(render);
-
 	if (gameMode === "manual" && !playing) {
 		raycaster.setFromCamera( mouse, camera );
 		var layerCubes = scene.children.filter(function(child) { 
@@ -379,10 +405,10 @@ function setGameState(stateObj) {
 // intersection stuff
 
 function onDocumentMouseMove(evt) {
-	mouse.x =   ( ( evt.clientX + width - window.innerWidth ) / width  ) * 2 - 1;
-	mouse.y = - ( evt.clientY / window.innerHeight ) * 2 + 1;
+	mouse.x =   ( ( evt.pageX + width - window.innerWidth ) / width  ) * 2 - 1;
+	mouse.y = - ( evt.pageY / window.innerHeight ) * 2 + 1;
 }
 
 // TODO
-// clean up UI
 // refactor EVERYTHING
+// add saving via localStorage
