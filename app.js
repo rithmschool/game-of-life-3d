@@ -251,25 +251,19 @@ function generateCubes(len) {
 		for (var j=0;j<len;j++) {
 			var cubeRow = [];
 			for (var k=0;k<len;k++) {
-				cubeRow.push(addCube([i - len/2,j - len/2,k - len/2]));
+				var cube = new Cube(
+					[1, 1, 1],
+					new THREE.MeshLambertMaterial({color: 0x00ff00, transparent: true}),
+					[i - len/2,j - len/2,k - len/2]
+				)
+				cubeRow.push(cube);
+				cube.addTo(scene);
 			}
 			cubePlane.push(cubeRow);
 		}
 		cubes.push(cubePlane);
 	}
 	return cubes;
-}
-
-function addCube(coordinates) {
-	var geometry = new THREE.BoxGeometry(1,1,1);
- 	var material = new THREE.MeshLambertMaterial({
- 		color: 0x00ff00,
- 		transparent: true
- 	});
-	var cube = new THREE.Mesh(geometry, material);
-	cube.position.set.apply(cube.position,coordinates);
-	scene.add(cube);
-	return cube;
 }
 
 function setCubeState(cube, userDataOptions, materialOptions) {

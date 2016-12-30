@@ -1,15 +1,16 @@
-function Cube()
+function Cube(dimensions, material, coordinates, userData) {
 
+	var geometry = new THREE.BoxGeometry(dimensions[0], dimensions[1], dimensions[2]);
+	THREE.Mesh.call(this, geometry, material);
+	this.position.set.apply(this.position, coordinates);
+	this.userData = userData || {};
 
+}
 
-// function addCube(coordinates) {
-// 	var geometry = new THREE.BoxGeometry(1,1,1);
-//  	var material = new THREE.MeshLambertMaterial({
-//  		color: 0x00ff00,
-//  		transparent: true
-//  	});
-// 	var cube = new THREE.Mesh(geometry, material);
-// 	cube.position.set.apply(cube.position,coordinates);
-// 	scene.add(cube);
-// 	return cube;
-// }
+Cube.prototype = Object.create(THREE.Mesh.prototype);
+Cube.prototype.constructor = Cube;
+
+Cube.prototype.addTo = function(scene) {
+	scene.add(this);
+	return this;
+}
