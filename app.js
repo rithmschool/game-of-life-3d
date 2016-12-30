@@ -26,23 +26,30 @@ var timeVal 		   = document.getElementById("time-val");
 var gameModeOptions    = document.querySelectorAll("input[type='radio']");
 var sections 		   = document.querySelectorAll("section > h1");
 var mouse = new THREE.Vector2();
-var gameMode = 'random';
-var playing = false;
-var interval = 2000;
+
 var initialCubeCoords = [];
+var universe = new Universe(len);
+var game = new Game(
+	universe,
+	[+keepAliveMin.value, +keepAliveMax.value],
+	[+makeAliveMin.value, +makeAliveMax.value],
+	+time.value * 1000
+);
 
 lifeProbability.addEventListener('input', function(e) {
+	game.lifeProbability = +e.target.value / 100;
 	lifeProbabilityVal.innerText = e.target.value + "%";
 });
 
 layer.addEventListener('input', function(e) {
 	layerVal.innerText = e.target.value;
-	setManualInitialLifeState(universe, +e.target.value);
+	game.layer = +e.target.value
+	setManualInitialLifeState(universe, game.layer);
 });
 
 time.addEventListener('input', function(e) {
 	timeVal.innerText = e.target.value;
-	interval = +e.target.value * 1000;
+	game.evolutionTime = +e.target.value * 1000;
 });
 
 exampleList.addEventListener('click', function(e) {
@@ -74,7 +81,7 @@ sections.forEach(function(section) {
 					child.material.opacity = 0;
 				}
 			});
-		} else if (section.innerText === "Modes" && gameMode === "manual") {
+		} else if (section.innerText === "Modes" && game.mode === "manual") {
 			setManualInitialLifeState(universe, +layer.value);
 		}
 	});
@@ -84,18 +91,18 @@ gameModeOptions.forEach(function(gameModeInput) {
 	gameModeInput.addEventListener('click', function(e) {
 		var newGameMode = e.target.value;
 
-		if (gameMode !== newGameMode) {
-			document.getElementById(gameMode).style.display = "none";
+		if (game.mode !== newGameMode) {
+			document.getElementById(game.mode).style.display = "none";
 			document.getElementById(newGameMode).style.display = "block";
 			if (newGameMode === "random") {
-				setRandomInitialLifeState(universe, +lifeProbability.value / 100);
+				setRandomInitialLifeState(universe, game.lifeProbability );
 			} else {
 				setRandomInitialLifeState(universe, 0);
 				setManualInitialLifeState(universe, +layer.value);
 			}
 		}
 
-		gameMode = newGameMode;
+		game.mode = newGameMode;
 
 	});
 });
@@ -116,20 +123,23 @@ scene.add(camera);
 var whiteLight = new THREE.PointLight(0xffffff);
 whiteLight.position.set(0, 100, 0);
 scene.add(whiteLight);
+
+// raycasting
 var raycaster = new THREE.Raycaster();
+
+// rendering
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(width, height);
 
 main.appendChild(renderer.domElement);
 
-var universe = new Universe(len);
 universe.addTo(scene);
 var cubes = universe.cubes;
 
-setRandomInitialLifeState(universe, +lifeProbability.value / 100);
+setRandomInitialLifeState(universe, game.lifeProbability);
 
 newUniverse.addEventListener('click', function() {
-	setRandomInitialLifeState(universe, +lifeProbability.value / 100);
+	setRandomInitialLifeState(universe, game.lifeProbability);
 });
 
 clearUniverse.addEventListener('click', function() {
@@ -138,7 +148,7 @@ clearUniverse.addEventListener('click', function() {
 });
 
 reset.addEventListener('click', function() {
-	playing = false;
+	game.playing = false;
 	start.innerText = "Play";
 	setRandomInitialLifeState(universe, 0);
 	setGameState({
@@ -149,28 +159,28 @@ reset.addEventListener('click', function() {
 });
 
 start.addEventListener('click', function(e) {
-	playing = !playing;
+	game.playing = !game.playing;
 	var then = Date.now();
 	var keepAlive = [+keepAliveMin.value, +keepAliveMax.value];
 	var makeAlive = [+makeAliveMin.value, +makeAliveMax.value];
 
-	if (gameMode === "manual") {
+	if (game.mode === "manual") {
 		setManualInitialLifeState(universe, -1, 0x00ff00);
 	}
 	
-	e.target.innerText = playing ? "Pause" : "Play"
+	e.target.innerText = game.playing ? "Pause" : "Play"
 
 	evolve(cubes, keepAlive, makeAlive);
 
 	function evolve(cubes, keepAliveVals, makeAliveVals) {
-		if (!playing) return
+		if (!game.playing) return
 
 		requestAnimationFrame(evolve.bind(this,cubes,keepAliveVals,makeAliveVals));
 
 		var now = Date.now();
 		var delta = now - then;
-		if (delta > interval) {
-			then = now - delta % interval;
+		if (delta > game.evolutionTime) {
+			then = now - delta % game.evolutionTime;
 
 			var newStatus = getEvolveStatuses(universe, keepAliveVals, makeAliveVals);
 			for (var i = 0; i < cubes.length; i++) {
@@ -197,7 +207,7 @@ render();
 
 function render() {
 	requestAnimationFrame(render);
-	if (gameMode === "manual" && !playing) {
+	if (game.mode === "manual" && !game.playing) {
 		raycaster.setFromCamera( mouse, camera );
 		var layerCubes = scene.children.filter(function(child) { 
 			var x = child.position.x + len / 2;
