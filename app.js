@@ -1,15 +1,8 @@
-var main = document.querySelector("main");
 var start = document.getElementById("start");
 var reset = document.getElementById("reset");
 var newUniverse = document.getElementById("new-universe");
 var clearUniverse = document.getElementById("clear-universe");
 var exampleList = document.getElementById("examples");
-var width = main.offsetWidth;
-var height = window.innerHeight;
-var viewAngle = 45;
-var aspect = width / height;
-var near = 0.1;
-var far = 10000;
 var min = -25;
 var max = 25;
 var len = 12;
@@ -48,7 +41,7 @@ layer.addEventListener('input', function(e) {
 });
 
 time.addEventListener('input', function(e) {
-	timeVal.innerText = e.target.value;
+	timeVal.innerText = (+e.target.value).toFixed(1);
 	game.evolutionTime = +e.target.value * 1000;
 });
 
@@ -71,9 +64,9 @@ sections.forEach(function(section) {
 			scene.children.forEach(function(child) {
 				if (child.userData.isAlive) {
 					initialCubeCoords.push([
-						child.position.x + len / 2,
-						child.position.y + len / 2,
-						child.position.z + len / 2,
+						child.position.x,
+						child.position.y,
+						child.position.z,
 					]);
 				}
 				if (child.userData.inPurgatory) {
@@ -106,23 +99,6 @@ gameModeOptions.forEach(function(gameModeInput) {
 
 	});
 });
-
-var scene = new THREE.Scene();
-scene.background = new THREE.Color(0xFFFFFF);
-
-var camera = 
-	new THREE.PerspectiveCamera(
-		viewAngle,
-		aspect,
-		near,
-		far
-	);
-
-camera.position.set(18,30,-21);
-scene.add(camera);
-var whiteLight = new THREE.PointLight(0xffffff);
-whiteLight.position.set(0, 100, 0);
-scene.add(whiteLight);
 
 // raycasting
 var raycaster = new THREE.Raycaster();
@@ -160,6 +136,8 @@ reset.addEventListener('click', function() {
 
 start.addEventListener('click', function(e) {
 	game.playing = !game.playing;
+	e.target.innerText = game.playing ? "Pause" : "Play";
+
 	var then = Date.now();
 	var keepAlive = [+keepAliveMin.value, +keepAliveMax.value];
 	var makeAlive = [+makeAliveMin.value, +makeAliveMax.value];
@@ -168,7 +146,6 @@ start.addEventListener('click', function(e) {
 		setManualInitialLifeState(universe, -1, 0x00ff00);
 	}
 	
-	e.target.innerText = game.playing ? "Pause" : "Play"
 
 	evolve(cubes, keepAlive, makeAlive);
 
@@ -183,15 +160,10 @@ start.addEventListener('click', function(e) {
 			then = now - delta % game.evolutionTime;
 
 			var newStatus = getEvolveStatuses(universe, keepAliveVals, makeAliveVals);
-			for (var i = 0; i < cubes.length; i++) {
-				for (var j = 0; j < cubes.length; j++) {
-					for (var k = 0; k < cubes.length; k++) {
-						var cube = cubes[i][j][k];
-						cube.userData.isAlive = newStatus[i][j][k];
-						cube.material.opacity = +cube.userData.isAlive / 2;
-					}
-				}
-			}
+			universe.forEach(function(cube, i, j, k) {
+				cube.userData.isAlive = newStatus[i][j][k];
+				cube.material.opacity = +cube.userData.isAlive / 2;
+			});
 		}
 	}
 
@@ -201,6 +173,9 @@ main.addEventListener('mousemove', onDocumentMouseMove);
 main.addEventListener('mousedown', toggleIntersect);
 
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.target = new THREE.Vector3(len / 2, len / 2, len / 2);
+controls.update();
+
 var intersected = null;
 
 render();
@@ -209,11 +184,13 @@ function render() {
 	requestAnimationFrame(render);
 	if (game.mode === "manual" && !game.playing) {
 		raycaster.setFromCamera( mouse, camera );
-		var layerCubes = scene.children.filter(function(child) { 
-			var x = child.position.x + len / 2;
-			var y = child.position.y + len / 2;
-			var z = child.position.z + len / 2;
-			return inLayer(x, y, z, +layer.value, len);
+		var layerCubes = scene.children.filter(function(child) {
+			if (child.constructor === "Cube") {	
+				var x = child.position.x;
+				var y = child.position.y;
+				var z = child.position.z;
+				return universe.inLayer(cubes[x][y][z], +layer.value);
+			}
 		});
 		var intersects = raycaster.intersectObjects( layerCubes );
 		if (intersects.length > 0) {
@@ -255,7 +232,7 @@ function render() {
 }
 
 // cube stuff
-
+// universe function
 function setRandomInitialLifeState(universe, lifeProbability) {
 	universe.forEach(function(cube) {
 		var isAlive = Math.random() < lifeProbability;
@@ -270,11 +247,11 @@ function setRandomInitialLifeState(universe, lifeProbability) {
 }
 
 // manual stuff
-
+// universe function
 function setManualInitialLifeState(universe, layer, color) {
-	universe.forEach(function(cube, i, j, k) {
+	universe.forEach(function(cube) {
 		if (!cube.userData.isAlive) {
-			var inPurgatory = inLayer(i, j, k, layer, universe.cubes.length);
+			var inPurgatory = universe.inLayer(cube, layer);
 			cube.setCubeState({
 				inPurgatory: inPurgatory
 			}, {
@@ -282,20 +259,7 @@ function setManualInitialLifeState(universe, layer, color) {
 				color: new THREE.Color(color || 0xffff00)
 			});
 		}
-	})
-}
-
-function inLayer(x,y,z,layerId, len) {
-	var lower = len / 2 - 1 - layerId;
-	var upper = len /2 + layerId;
-	var xSides = (x === lower || x === upper) && between(y, lower, upper) && between(z, lower, upper);
-	var ySides = (y === lower || y === upper) && between(x, lower, upper) && between(z, lower, upper);
-	var zSides = (z === lower || z === upper) && between(x, lower, upper) && between(y, lower, upper)  
-	return xSides || ySides || zSides;
-}
-
-function between(x,a,b) {
-	return a <= x && x <= b;    
+	});
 }
 
 function toggleIntersect() {
@@ -313,36 +277,20 @@ function toggleIntersect() {
 
 // evolution / neighbor stuff 
 
-function livingNeighborCount(coords, cubes) {
-	var numAlive = cubes[coords[0]][coords[1]][coords[2]].userData.isAlive ? -1 : 0;
-	for (var i = coords[0] - 1; i <= coords[0] + 1; i++) {
-		for (var j = coords[1] - 1; j <= coords[1] + 1; j++) {
-			for (var k = coords[2] - 1; k <= coords[2] + 1; k++) {
-				try {
-					if (cubes[i][j][k].userData.isAlive) numAlive++;
-				} catch(e) {
-					continue
-				}
-			}
-		}
-	}
-	return numAlive;
-}
-
-function setAlive(coords, aliveVals, cubes) {
-	var nbrs = livingNeighborCount(coords,cubes);
+function setAlive(universe, cube, aliveVals) {
+	var nbrs = universe.neighborCount(cube);
 	return nbrs >= aliveVals[0] && nbrs <= aliveVals[1];
 }
 
 function getEvolveStatuses(universe, keepAliveVals, makeAliveVals) {
 	return universe.map(function(cube, i, j, k) {
 		var aliveVals = cube.userData.isAlive ? keepAliveVals : makeAliveVals;
-		return setAlive([i,j,k], aliveVals, cubes);
+		return setAlive(universe, cube, aliveVals);
 	});
 }
 
 // curated initial state stuff
-
+// game function
 function setGameState(stateObj) {
 	keepAliveMin.value = stateObj.keepAlive[0];
 	keepAliveMax.value = stateObj.keepAlive[1];

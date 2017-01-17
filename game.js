@@ -11,6 +11,14 @@ function Game(universe, keepAlive, makeAlive, evolutionTime, mode, layer, lifePr
 
 }
 
+Game.prototype.createScene = function() {
+	//
+}
+
 Game.prototype.init = function(color, cameraOptions, cameraPosition) {
-// 
+	// 
+}
+
+Game.prototype.render = function() {
+	
 }
