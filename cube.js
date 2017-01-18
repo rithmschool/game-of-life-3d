@@ -10,16 +10,46 @@ function Cube(dimensions, material, coordinates, userData) {
 Cube.prototype = Object.create(THREE.Mesh.prototype);
 Cube.prototype.constructor = Cube;
 
+Cube.prototype.colors = {
+	alive: 0x00ff00,
+	inPurgatory: 0xffff00
+}
+
 Cube.prototype.addTo = function(scene) {
 	scene.add(this);
 	return this;
 }
 
-Cube.prototype.setCubeState = function(userDataState, materialState) {
-	for (var option in userDataState) {
-		this.userData[option] = userDataState[option];
+Cube.prototype.setState = function(key, newState) {
+	for (var option in newState) {
+		this[key][option] = newState[option];
 	}
-	for (var option in materialState) {
-		this.material[option] = materialState[option];
+}
+
+Cube.prototype.setRandomLifeState = function(lifeProbability) {
+	var isAlive = Math.random() < lifeProbability;
+	this.setState('userData', {
+		isAlive: isAlive,
+		inPurgatory: false
+	});
+	this.setState('material', {
+		opacity: +isAlive / 2,
+		color: new THREE.Color(this.colors.alive)
+	});
+}
+
+Cube.prototype.setHighlight = function(bool) {
+	var inPurgatory = this.userData.inPurgatory;
+	var newColorKey, newOpacity;
+	if (bool) {
+		newColorKey = inPurgatory ? 'alive' : 'inPurgatory';
+		newOpacity = 1;
+	} else {
+		newColorKey = inPurgatory ? 'inPurgatory' : 'alive';
+		newOpacity = inPurgatory ? 1 / 5 : 1 / 2;
 	}
+	this.setState('material', {
+		color: new THREE.Color(this.colors[newColorKey]),
+		opacity: newOpacity
+	});
 }

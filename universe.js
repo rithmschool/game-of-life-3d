@@ -58,7 +58,7 @@ Universe.prototype.neighborCount = function(cube) {
 		for (var j = -1; j < 2; j++) {
 			for (var k = -1; k < 2; k++) {
 				try {
-					if (cubes[x + i][y + j][z + k].userData.isAlive) count++;
+					if (this.cubes[x + i][y + j][z + k].userData.isAlive) count++;
 				} catch(e) {
 					continue
 				}
@@ -67,6 +67,14 @@ Universe.prototype.neighborCount = function(cube) {
 	}
 	return count;
 };
+
+Universe.prototype.getNextLifeState = function(keepAliveVals, makeAliveVals) {
+	return universe.map(function(cube) {
+		var nbrs = universe.neighborCount(cube);
+		var aliveVals = cube.userData.isAlive ? keepAliveVals : makeAliveVals;
+		return nbrs >= aliveVals[0] && nbrs <= aliveVals[1];
+	});
+}
 
 Universe.prototype.inLayer = function(cube, layerId) {
 	var len = this.cubes.length;
@@ -85,8 +93,27 @@ Universe.prototype.inLayer = function(cube, layerId) {
 	}
 }
 
-// Universe.prototype.setState = function(cb) {
-// 	this.forEach(function(cube) {
-// 		cube.setCubeState(cb);
-// 	});
-// };
+Universe.prototype.setRandomLifeState = function(lifeProbability) {
+	this.forEach(function(cube) {
+		cube.setRandomLifeState(lifeProbability);
+	});
+}
+
+Universe.prototype.clear = function() {
+	this.setRandomLifeState(0);
+}
+
+Universe.prototype.setPurgatoryState = function(layer) {
+	this.forEach(function(cube) {
+		if (!cube.userData.isAlive) {
+			var inPurgatory = universe.inLayer(cube, layer);
+			cube.setState('userData', {
+				inPurgatory: inPurgatory
+			});
+			cube.setState('material', {
+				opacity: +inPurgatory / 5,
+				color: new THREE.Color(cube.colors.inPurgatory)
+			});
+		}
+	})
+}
