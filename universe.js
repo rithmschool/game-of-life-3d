@@ -1,5 +1,6 @@
 function Universe(len) {
-	this.cubes = []
+	this.len = len;
+	this.cubes = [];
 	for (var i = 0; i < len; i++) {
 		var cubePlane = [];
 		for (var j = 0; j < len; j++) {

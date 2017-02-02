@@ -107,11 +107,7 @@ gameModeOptions.forEach(function(gameModeInput) {
 	});
 });
 
-// rendering
-var renderer = new THREE.WebGLRenderer();
-renderer.setSize(width, height);
-
-main.appendChild(renderer.domElement);
+main.appendChild(game.renderer.domElement);
 
 universe.addTo(game.scene);
 universe.setRandomLifeState(game.lifeProbability);
@@ -154,55 +150,16 @@ start.addEventListener('click', function(e) {
 main.addEventListener('mousemove', onDocumentMouseMove);
 main.addEventListener('mousedown', toggleIntersect);
 
-var controls = new THREE.OrbitControls(game.camera, renderer.domElement);
-controls.target = new THREE.Vector3(len / 2, len / 2, len / 2);
-controls.update();
-
-var intersected = null;
-
-render();
-
-function render() {
-	requestAnimationFrame(render);
-	if (game.mode === "manual" && !game.playing) {
-		game.raycaster.setFromCamera( game.mouse, game.camera );
-		var layerCubes = game.scene.children.filter(function(child) {
-			if (child.constructor === Cube) {	
-				var x = child.position.x;
-				var y = child.position.y;
-				var z = child.position.z;
-				return universe.inLayer(universe.cubes[x][y][z], +layer.value);
-			}
-		});
-		var intersects = game.raycaster.intersectObjects( layerCubes );
-		if (intersects.length > 0) {
-			// we have an intersection! 
-			// should highlight cell in color that it will become, with full opacity
-			if (intersected !== intersects[0].object) {
-				// we have a new intersection! make sure to reset the old one.
-				if (intersected) intersected.setHighlight(false);
-				// style the new one.
-				intersected = intersects[0].object;
-				intersected.setHighlight(true);
-			}
-		} else {
-			// no intersection. reset color of former intersected cube, if it exists.
-			if (intersected) intersected.setHighlight(false);
-			intersected = null;
-		}
-	}
-
-	renderer.render(game.scene, game.camera);
-}
+game.render();
 
 function toggleIntersect() {
-	if (intersected) {
-		var newLifeStatus = !intersected.userData.isAlive;
-		intersected.setState('userData', {
+	if (game.intersected) {
+		var newLifeStatus = !game.intersected.userData.isAlive;
+		game.intersected.setState('userData', {
 			isAlive: newLifeStatus,
 			inPurgatory: !newLifeStatus,
 		});
-		intersected.setState('material', {
+		game.intersected.setState('material', {
 			opacity: 1,
 			color: new THREE.Color(newLifeStatus ? 0xffff00 : 0x00ff00)
 		});
@@ -217,8 +174,7 @@ function onDocumentMouseMove(evt) {
 }
 
 // TODO
-// evolve -- cancelAnimationFrame on pause
-// fix bugs around manual mode in play
+
 // on load, have rules open
 // refactor EVERYTHING
 // add saving via localStorage
