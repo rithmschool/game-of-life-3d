@@ -24,13 +24,19 @@ Before digging into the application, we need to first understand some of the bas
 
 ### Application Structure: `GameRenderer`
 
+This project comes with an `index.html` file and several JavaScript files. Feel free to add your own stylesheet if you'd like to create additional styles for your project.
+
 Our application will be built using three constructor functions: `Cube`, `CubeUniverse`, and `GameRenderer`. 
 
 - The `GameRenderer` will be responsible for rendering and updating the scene using Three.js.
 - The `Cube` will be responsible for changing its life status
 - The `CubeUniverse` will collect all of the cubes, and be responsible for counting neighbors for cubes, determining the next state of the universe, and so on.
 
-Let's begin with our `GameRenderer`. The constructor function should take in a width and a height, and create a camera, scene, a renderer, and whatever lighting you want for your version of the game. You should also implement a prototpe method called `render` that continually rerenders the scene.
+Let's begin with our `GameRenderer`. The constructor function should take in a width, a height, and a DOM node, and create a camera, scene, a renderer, and whatever lighting you want for your version of the game. You should attach the renderer to the DOM node passed into the constructor function. You should also implement a prototpe method called `render` that continually rerenders the scene. 
+
+Once you've done that, call the constructor function inside of the `app.js` and store it in a value called `game`. Make sure everything is loading correctly!
+
+(Bonus: we only need to call this constructor function once. Can you ensure that if you accidentally call the constructor again, a new game won't be created?)
 
 ### Application Structure: `Cube`
 
