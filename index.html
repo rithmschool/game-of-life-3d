@@ -2,112 +2,15 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Document</title>
-	<link href="https://fonts.googleapis.com/css?family=Montserrat|Crimson+Text|Bungee+Shade" rel="stylesheet">
-	<link rel="stylesheet" href="style.css">
+	<title>3D Game of Life</title>
 </head>
 <body>
-	<aside>
-		<h2>
-			<p>3D</p>
-			<p>Game of</p>
-			<p>Life</p>
-		</h2>
-		<section>
-			<h1>Rules</h1>
-			<div>
-				<p>In the Game of Life, the population of cubes evolves over time. In each generation, whether a cube lives or dies depends on its neighbors.</p>
-				<p>More specifically, choose four numbers <em>a</em>, <em>b</em>, <em>c</em>, and <em>d</em>. Here's the breakdown:</p>
-				<ol>
-					<li>If a cube has between <em>a</em> and <em>b</em> neighbors, it stays alive to the next generation. Otherwise it dies (by over- or underpopulation.)</li>
-					<li>If an empty cell has between <em>c</em> and <em>d</em> neighbors, it becomes alive in the next generation (by reproduction).</li>
-				</ol>
-				<p>Because these four parameters determine the rules of the game, for fixed <em>a</em>, <em>b</em>, <em>c</em>, and <em>d</em>, we say that you are playing Life version <em>a</em>,<em>b</em>,<em>c</em>,<em>d</em>. Note that each cube can have at least 0 neighbors, and at most 26.</p>
-			</div>
-		</section>
-		<section>
-			<h1>Examples</h1>
-			<div>
-				<p>Here are some examples illustrating how the 3D Game of Life plays out with certain sets of initial conditions. Click on one of the examples below to set the initial game state.</p>
-				<ol id="examples">
-					<li>Beacons (Life 6,7,7,7)</li>
-					<li>Clocks (Life 5,7,6,6)</li>
-					<li>Glider (Life 4,5,5,5)</li>
-					<li>Collision (Life 5,7,6,6)</li>
-				</ol>
-			</div>
-		</section>
-		<section>
-			<h1>Modes</h1>
-			<div>
-				<div id="game-modes">
-					<p>
-						<label for="">Random</label>
-						<input type="radio" value="random" name="game-mode" checked>
-					</p>
-					<p>
-						<label for="">Manual</label>
-						<input type="radio" value="manual" name="game-mode">
-					</p>
-				</div>
-				<div id="random">
-					<p>In Random Mode, the universe's initial state is determined probabilistically. You can use the slider below to set the probability that any given square will start out alive.</p>
-					<p>Probability that a cube starts out alive: <span id="life-probability-val">30%</span></p>
-					<input id="life-probability" type="range" min="0" max="100" step="1" value="30">
-					<button id="new-universe">Generate new universe</button>
-				</div>
-				<div id="manual">
-					<p>In Manual Mode, you set the initial state of the universe by clicking on cubes to toggle their life status. Use the slider below to highlight different layers of the universe to work on (cubes colored yellow are ones you can toggle between alive and dead.)</p>
-					<p>Current Layer: <span id="layer-val">0</span></p>
-					<input id="layer" type="range" min="0" max="5" step="1" value="0">
-					<button id="clear-universe">Clear universe</button>
-				</div>
-			</div>
-		</section>
-		<section>
-			<h1>Play!</h1>
-			<div id="game-options">
-				<p>Life version:</p>
-				<p class="narrow">
-					<label><em>a:</em></label>
-					<input type="number" id="keep-alive-min" min="0" max="26" value="4">
-					<label><em>b:</em></label>
-					<input type="number" id="keep-alive-max" min="0" max="26" value="5">
-				</p>
-				<p class="narrow">
-					<label><em>c:</em></label>
-					<input type="number" id="make-alive-min" min="0" max="26" value="5">
-					<label><em>d:</em></label>
-					<input type="number" id="make-alive-max" min="0" max="26" value="5">
-				</p>
-				<p>Time between generations (s): <span id="time-val">2.0</span></p>
-				<input id="time" type="range" min="0" max="4" step="0.1" value="2">
-				<div id="game-buttons">
-					<button id="start">Play</button>
-					<button id="reset">Reset</button>
-				</div>
-			</div>
-		</section>
-		<section>
-			<h1>Notes</h1>
-			<div>
-				<ol id="notes">
-					<li>Based on Jon Conway's <a href="https://en.wikipedia.org/wiki/Conway's_Game_of_Life" target="_blank">2D Game of Life</a>.</li>
-					<li>Many examples taken from Carter Bays' paper <em><a href="http://www.complex-systems.com/pdf/01-3-1" target="_blank">Candidates for the Game of Life in Three Dimensions</a></em>.</li>
-					<li>Source code available <a href="https://github.com/mmmaaatttttt/game-of-life-3d" target="_blank">here</a>.</li>
-				</ol>
-			</div>
-		</section>
-
-	</aside>
-	<main></main>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r83/three.js"></script>
-	<script src="//threejs.org/examples/js/controls/OrbitControls.js"></script>
-	<script src="cube.js"></script>
-	<script src="universe.js"></script>
-	<script src="game.js"></script>
+	<div id="main"></div>
+	<script src="https://threejs.org/build/three.js"></script>
+	<script src="Cube.js"></script>
+	<script src="CubeUniverse.js"></script>
+	<script src="GameRenderer.js"></script>
 	<script src="examples.js"></script>
 	<script src="app.js"></script>
-
 </body>
 </html>
