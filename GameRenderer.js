@@ -9,7 +9,7 @@ function GameRenderer(width, height, root) {
 	var near = 0.1;
 	var far = 10000;
 	this.camera = new THREE.PerspectiveCamera(viewAngle, aspect, near, far);
-	this.camera.position.set(28,23,-21);
+	this.camera.position.set(3,3,20);
 
 	// scene setup
 	this.scene = new THREE.Scene();

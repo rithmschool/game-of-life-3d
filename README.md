@@ -47,6 +47,12 @@ Once you've done that, call the constructor function inside of the `app.js` and 
 
 ### Application Structure: `Cube`
 
-Next, let's work on the `Cube` constructor, which is set up to inherit from `THREE.Mesh`.
+Next, let's work on the `Cube` constructor, which is set up to inherit from `THREE.Mesh`. The cube constructor should take three coordinates (_x_, _y_, and _z_), and create a cube. Inside of the constructor is where you can decide what type of mesh to use for the cube, what default colors it should have, and so on.
+
+To begin, we'll assume that when a cube is created, it is not alive. We'll do this setting the `transparent` property on our cube material equal to `true`, setting the `opacity` on its material to 0, and by setting an `isAlive` property on the cube's `userData` to `false`. In Three.js, every element in the scene has a `userData` object onto which you can attach custom key-value pairs.
+
+You should also implement a `setAlive` method on the prototype, which accepts a boolean. If the boolean is `true`, the cube should be set to alive; otherwise, it should not. Calling `setAlive` with no arguments should be the same as calling it with an argument of `true`.
+
+Once this is implemented, try creating a cube and adding it to the scene.
 
 ### Application Structure: `CubeUniverse`
