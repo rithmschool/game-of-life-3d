@@ -13,10 +13,17 @@ Because these four parameters determine the rules of the game, for fixed _a_, _b
 
 ## Table of Contents
 
+### Part 1: Overview
+
 1. [Introduction to Three.js](#introduction-to-threejs)
+
+### Part 2: A Randomly Generated Initial Board
+
 2. [Application Structure: `GameRenderer`](#application-structure-gamerenderer)
 2. [Application Structure: `Cube`](#application-structure-cube)
 2. [Application Structure: `CubeUniverse`](#application-structure-cubeuniverse)
+
+### Part 3: A Customizable Initial Board
 
 ### Introduction to Three.js
 
@@ -39,5 +46,7 @@ Once you've done that, call the constructor function inside of the `app.js` and 
 (Bonus: we only need to call this constructor function once. Can you ensure that if you accidentally call the constructor again, a new game won't be created?)
 
 ### Application Structure: `Cube`
+
+Next, let's work on the `Cube` constructor, which is set up to inherit from `THREE.Mesh`.
 
 ### Application Structure: `CubeUniverse`
