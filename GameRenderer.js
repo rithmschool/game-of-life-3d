@@ -24,11 +24,45 @@ function GameRenderer(width, height, root) {
 
 	root.appendChild( this.renderer.domElement );
 
+	// add placeholders for timers
+	this.oldTime = Date.now();
+	this.newTime = null;
+
 }
 
-GameRenderer.prototype.render = function() {
+GameRenderer.prototype.render = function(universe) {
+	this.newTime = Date.now();
+	var step = 1500;
+	var change = this.newTime - this.oldTime;
+	requestAnimationFrame(this.render.bind(this, universe));
 
-	requestAnimationFrame(this.render.bind(this));
+	if (change > step) {
+		this.oldTime = this.newTime - change % step;
+		universe.evolve();
+	}
+
 	this.renderer.render(this.scene, this.camera);
 
 }
+
+GameRenderer.prototype.addCameraControls = function(x,y,z) {
+    var controls = new THREE.OrbitControls(
+    	this.camera,
+    	this.renderer.domElement
+    );
+    // set the center of the rotation
+    // for the most natural movement, make this 
+    // the center of the cube universe
+    controls.target = new THREE.Vector3(x, y, z);
+    controls.update();
+    return controls;
+}
+
+
+
+
+
+
+
+
+

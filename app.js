@@ -12,4 +12,6 @@ universe.eachCube(function(cube) {
   cube.setAlive(Math.random() < probability);
 });
 
-game.render();
+game.addCameraControls(universe.len / 2, universe.len / 2, universe.len / 2);
+
+game.render(universe);

@@ -23,8 +23,11 @@ Because these four parameters determine the rules of the game, for fixed _a_, _b
 2. [Application Structure: `Cube`](#application-structure-cube)
 3. [Application Structure: `CubeUniverse`](#application-structure-cubeuniverse)
 4. [Animating the Evolution](#animating-the-evolution)
+5. [Adding an Interface](#adding-an-interface)
 
 ### Part 3: A Customizable Initial Board
+
+### Part 4: Next Steps
 
 ### Introduction to Three.js
 
@@ -81,3 +84,36 @@ Be careful with the implementation here. You can't evolve any of the cubes until
 Once you think you've got this working, try evolving the universe in the console several times. 
 
 ### Animating the Evolution
+
+We're now reaching the point where it would be nice to have some more dynamic behavior on the page. For instance, we can only evolve the universe manually, by calling `evolve` in the console. It's also annoying that we can't move the camera around to explore the universe as it is evolving.
+
+Let's fix both of these problems, but in reverse order. Three.js provides an external library called `OrbitControls` which adds mouse controls to the camera, so that we can rotate it and zoom.
+
+To get this working, we first need to add a script tag into our HTML.
+
+```html
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+```
+
+Next, let's go back into our `GameRenderer` and add the following prototype method:
+
+```js
+GameRenderer.prototype.addCameraControls = function(x,y,z) {
+    var controls = new THREE.OrbitControls(
+        this.camera,
+        this.renderer.domElement
+    );
+    // set the center of the rotation
+    // for the most natural movement, make this 
+    // the center of the cube universe
+    controls.target = new THREE.Vector3(x, y, z);
+    controls.update();
+    return controls;
+}
+```
+
+That's it! You should now be able to control the camera with the moust.
+
+Next, pick an interval (e.g. one or two seconds) and try to get the game to automatically evolve after every interval. You'll need to modify the `GameRenderer`'s `render` method, using the pattern from the slideshow in Part 1. You'll also need to figure out how to pass the cube universe into the `render` method in order to evolve it.
+
+### Adding an Interface
