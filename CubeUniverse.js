@@ -1,8 +1,8 @@
-function CubeUniverse(len, keepAlive, makeAlive) {
+function CubeUniverse(len, evolveParams, randomProbability) {
   this.len = len;
-  this.keepAlive = keepAlive;
-  this.makeAlive = makeAlive;
-  this.cubes = []
+  this.evolveParams = evolveParams;
+
+  this.cubes = [];
 
   // generating the 3D array
   for (var i = 0; i < len; i++) {
@@ -10,7 +10,7 @@ function CubeUniverse(len, keepAlive, makeAlive) {
     for (var j = 0; j < len; j++) {
       var cubeRow = [];
       for (var k = 0; k < len; k++) {
-        var cube = new Cube(i,j,k)
+        var cube = new Cube(i,j,k);
         cubeRow.push(cube);
       }
       cubePlane.push(cubeRow);
@@ -55,9 +55,12 @@ CubeUniverse.prototype.evolve = function() {
   // determine whether it should live in the next generation
   this.eachCube(function(cube) {
     var count = this.__neighborCount(cube);
+    // if the cube is alive, the first two parameters determine
+    // its status in the next generation; otherwise, 
+    // otherwise, use the second two parameters do this.
     var aliveVals = cube.userData.isAlive ? 
-                    this.keepAlive : 
-                    this.makeAlive;
+                    this.evolveParams.slice(0, 2) : 
+                    this.evolveParams.slice(2);
     var nextGenIsAlive = aliveVals[0] <= count && count <= aliveVals[1];
     cube.userData.nextGenIsAlive = nextGenIsAlive;
   }.bind(this));
@@ -67,4 +70,14 @@ CubeUniverse.prototype.evolve = function() {
   this.eachCube(function(cube) {
     cube.setAlive(cube.userData.nextGenIsAlive);
   });
+}
+
+CubeUniverse.prototype.setRandomInitialState = function(prob) {
+  this.eachCube(function(cube) {
+    cube.setAlive(Math.random() < prob);
+  });
+}
+
+CubeUniverse.prototype.clear = function() {
+  this.setRandomInitialState(0);
 }

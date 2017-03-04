@@ -1,6 +1,6 @@
 # 3D Game of Life
 
-## Introduction
+# Introduction
 
 In this tutorial, we'll use [three.js](threejs.org) to build a 3D version of John Conway's [Game of Life](https://en.wikipedia.org/wiki/Conway's_Game_of_Life). In the Game of Life, the population of cubes evolves over time. In each generation, whether a cube lives or dies depends on its neighbors.
 
@@ -11,13 +11,13 @@ More specifically, choose four numbers _a_, _b_, _c_, and _d_. Here's the breakd
 
 Because these four parameters determine the rules of the game, for fixed _a_, _b_, _c_, and _d_, we say that you are playing Life version _a_,_b_,_c_,_d_. In the 3D version of the game, each cube can have at least 0 neighbors, and at most 26. You can demo a live version [here](https://rithmschool.github.io/game-of-life-3d/).
 
-## Table of Contents
+# Table of Contents
 
-### Part 1: Overview
+## Part 1: Overview
 
 1. [Introduction to Three.js](#introduction-to-threejs)
 
-### Part 2: A Randomly Generated Initial Board
+## Part 2: A Randomly Generated Initial Board
 
 1. [Application Structure: `GameRenderer`](#application-structure-gamerenderer)
 2. [Application Structure: `Cube`](#application-structure-cube)
@@ -25,9 +25,11 @@ Because these four parameters determine the rules of the game, for fixed _a_, _b
 4. [Animating the Evolution](#animating-the-evolution)
 5. [Adding an Interface](#adding-an-interface)
 
-### Part 3: A Customizable Initial Board
+## Part 3: A Customizable Initial Board
 
-### Part 4: Next Steps
+1. 
+
+## Part 4: Next Steps
 
 ### Introduction to Three.js
 
@@ -59,7 +61,7 @@ Once this is implemented, try creating a cube and adding it to the scene.
 
 ### Application Structure: `CubeUniverse`
 
-The `CubeUniverse` constructor is where we will manage most of the complexity of the game logic. To begin, the constructor function should take a parameter called `len`, which corresponds to the length of one side of the universe. For example, if we pass in the number 3, this constructor should construct a universe of 27 cubes in a 3 &times; 3 &times; 3 grid. It should also accept the parameters that determine whether or not a cube that is alive in one generation stays alive to the next, and whether a cube that is dead in one generation can become alive in the next. These are the four parameters _a_, _b_, _c_, and _d_ mentioned in the introduction. For convenience, you may want to store _a_ and _b_ in an array called `keepAlive`, and _c_ and _d_ in an array called `makeAlive`
+The `CubeUniverse` constructor is where we will manage most of the complexity of the game logic. To begin, the constructor function should take a parameter called `len`, which corresponds to the length of one side of the universe. For example, if we pass in the number 3, this constructor should construct a universe of 27 cubes in a 3 &times; 3 &times; 3 grid. It should also accept the parameters that determine whether or not a cube that is alive in one generation stays alive to the next, and whether a cube that is dead in one generation can become alive in the next. These are the four parameters _a_, _b_, _c_, and _d_ mentioned in the introduction. For convenience, you may want to store them as an array on the object to be created by `CubeUniverse`.
 
 The object created by `CubeUniverse` should have a `cubes` property from which we can access all of the cubes. We would like to access them by coordinates; for example, if our universe is called `universe`, then `universe.cubes[0][0][0]` should refer to the cube with coordinates at (0, 0, 0). In order for this to work, `cubes` needs to be a 3D array: in other words, it is an array, whose elements are all arrays, and each of those elements is once again an array.
 
@@ -117,3 +119,12 @@ That's it! You should now be able to control the camera with the moust.
 Next, pick an interval (e.g. one or two seconds) and try to get the game to automatically evolve after every interval. You'll need to modify the `GameRenderer`'s `render` method, using the pattern from the slideshow in Part 1. You'll also need to figure out how to pass the cube universe into the `render` method in order to evolve it.
 
 ### Adding an Interface
+
+Before adding any more functionality to the canvas itself, let's take some time to add a little user interface. Add the following functionality to the game:
+
+- A user can change the initial probability that an individual cube will start out alive before the first evolution. (Where should you store this probability?)
+- A user can change the parameters that determine how the cubes evolve (i.e. the values of _a_, _b_, _c_, and _d_).
+- A user can click a button to play or pause the evolution of the cube universe. 
+- A user can click a button to generate a new random initial state for the universe.
+
+Feel free to add whatever prototype properties or methods you think are necessary. For example, it may help to create a `setRandomInitialState` method on `CubeUniverse` that takes in a probability _p_ and sets each cube to start out alive with probability _p_. You may also need a `playing` property on the `GameRenderer` to indicate whether the game should be playing or paused.

@@ -28,6 +28,9 @@ function GameRenderer(width, height, root) {
 	this.oldTime = Date.now();
 	this.newTime = null;
 
+	// games start paused
+	this.playing = false;
+
 }
 
 GameRenderer.prototype.render = function(universe) {
@@ -36,7 +39,7 @@ GameRenderer.prototype.render = function(universe) {
 	var change = this.newTime - this.oldTime;
 	requestAnimationFrame(this.render.bind(this, universe));
 
-	if (change > step) {
+	if (game.playing && change > step) {
 		this.oldTime = this.newTime - change % step;
 		universe.evolve();
 	}

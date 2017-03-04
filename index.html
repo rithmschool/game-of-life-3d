@@ -3,8 +3,84 @@
 <head>
 	<meta charset="UTF-8">
 	<title>3D Game of Life</title>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat|Crimson+Text|Bungee+Shade" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <aside>
+    <h2>
+      <p>3D</p>
+      <p>Game of</p>
+      <p>Life</p>
+    </h2>
+    <section>
+      <h1>Rules</h1>
+      <div>
+        <p>In the Game of Life, a population of cubes evolves over time. In each generation, whether a cube lives or dies depends on its neighbors.</p>
+        <p>More specifically, choose four numbers <em>a</em>, <em>b</em>, <em>c</em>, and <em>d</em>. Here's the breakdown:</p>
+        <ol>
+          <li>If a living cube has between <em>a</em> and <em>b</em> neighbors, it stays alive to the next generation. Otherwise it dies (by over- or underpopulation.)</li>
+          <li>If an empty cell has between <em>c</em> and <em>d</em> neighbors, it becomes alive in the next generation (by reproduction).</li>
+        </ol>
+        <p>Each cube can have between 0 and 26 neighbors.</p>
+        <small>Based on Jon Conway's <a href="https://en.wikipedia.org/wiki/Conway's_Game_of_Life" target="_blank">2D Game of Life</a>. Many examples taken from Carter Bays' paper <em><a href="http://www.complex-systems.com/pdf/01-3-1" target="_blank">Candidates for the Game of Life in Three Dimensions</a></em>. Source code available <a href="https://github.com/rithmschool/game-of-life-3d" target="_blank">here</a>. 
+        </small>
+      </div>
+    </section>
+    <!-- <section>
+      <h1>Examples</h1>
+      <div>
+        <p>Here are some examples illustrating how the 3D Game of Life plays out with certain sets of initial conditions. Click on one of the examples below to set the initial game state.</p>
+        <ol id="examples">
+          <li>Beacons (Life 6,7,7,7)</li>
+          <li>Clocks (Life 5,7,6,6)</li>
+          <li>Glider (Life 4,5,5,5)</li>
+          <li>Collision (Life 5,7,6,6)</li>
+        </ol>
+      </div>
+    </section> -->
+    <section>
+      <h1>Settings</h1>
+      <div>
+        <p class="life-params">
+          <label><em>a:</em></label>
+          <input type="number" data-idx="0" min="0" max="26" value="4">
+          <label><em>b:</em></label>
+          <input type="number" data-idx="1" min="0" max="26" value="5">
+          <label><em>c:</em></label>
+          <input type="number" data-idx="2" min="0" max="26" value="5">
+          <label><em>d:</em></label>
+          <input type="number" data-idx="3" min="0" max="26" value="5">
+        </p>
+        <div id="game-modes">
+          <p>
+            <label for="">Random</label>
+            <input type="radio" value="random" name="game-mode" checked>
+          </p>
+         <!--  <p>
+            <label for="">Manual</label>
+            <input type="radio" value="manual" name="game-mode">
+          </p> -->
+        </div>
+        <div>
+          <p>Probability that a cube starts out alive: <span id="random-probability-val">30%</span></p>
+          <input id="random-probability" type="range" min="0" max="100" step="1" value="30">
+          <!-- <button id="new-universe">Generate new universe</button> -->
+        </div>
+        <div id="manual">
+          <p>In Manual Mode, you set the initial state of the universe by clicking on cubes to toggle their life status. Use the slider below to highlight different layers of the universe to work on (cubes colored yellow are ones you can toggle between alive and dead.)</p>
+          <p>Current Layer: <span id="layer-val">0</span></p>
+          <input id="layer" type="range" min="0" max="5" step="1" value="0">
+          <button id="clear-universe">Clear universe</button>
+        </div>
+      </div>
+    </section>
+    <div class="button-area"> 
+      <button id="start">Play</button>
+      <button id="reset">Reset</button>
+    </div>
+  </aside>
 	<div id="main"></div>
 	<script src="https://threejs.org/build/three.js"></script>
   <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
