@@ -1,15 +1,13 @@
 function GameRenderer(width, height, root) {
 
-	if (GameRenderer.instance) return GameRenderer.instance;
-	GameRenderer.instance = this;
-
 	// camera setup
 	var viewAngle = 45;
 	var aspect = width / height;
 	var near = 0.1;
 	var far = 10000;
 	this.camera = new THREE.PerspectiveCamera(viewAngle, aspect, near, far);
-	this.camera.position.set(3,3,20);
+	this.camera.position.set(10, 20, 40);
+	this.camera.lookAt(new THREE.Vector3(3,3,3));
 
 	// scene setup
 	this.scene = new THREE.Scene();
