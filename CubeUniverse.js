@@ -81,3 +81,9 @@ CubeUniverse.prototype.setRandomInitialState = function(prob) {
 CubeUniverse.prototype.clear = function() {
   this.setRandomInitialState(0);
 }
+
+CubeUniverse.prototype.setPendingLayer = function(y) {
+  this.eachCube(function(cube) {
+    cube.setPending(cube.position.y === y);
+  });
+}

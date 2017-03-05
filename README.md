@@ -25,11 +25,17 @@ Because these four parameters determine the rules of the game, for fixed _a_, _b
 4. [Animating the Evolution](#animating-the-evolution)
 5. [Adding an Interface](#adding-an-interface)
 
-## Part 3: A Customizable Initial Board
+## Part 3: A Customizable Initial Universe
 
-1. 
+1. [Motivation](#motivation)
+2. [Pending Status Layers for Cubes](#pending-status-layers-for-cubes)
+3. [Handling Mouse Events](#handling-mouse-events)
+4. [Updating the Interface](#updating-the-interface)
+5. [Setting Up Examples](#setting-up-examples)
 
 ## Part 4: Next Steps
+
+1. [Supplemental Features](#supplemental-features)
 
 ### Introduction to Three.js
 
@@ -128,3 +134,27 @@ Before adding any more functionality to the canvas itself, let's take some time 
 - A user can click a button to generate a new random initial state for the universe.
 
 Feel free to add whatever prototype properties or methods you think are necessary. For example, it may help to create a `setRandomInitialState` method on `CubeUniverse` that takes in a probability _p_ and sets each cube to start out alive with probability _p_. You may also need a `playing` property on the `GameRenderer` to indicate whether the game should be playing or paused.
+
+### Motivation
+
+By now you should have a working version of the 3D Game of Life. You can even adjust the parameters of the game to explore how different values of _a_, _b_, _c_, and _d_ affect the system. This is great!
+
+But it would be even better if we could manually set the initial state, say by clicking on squares to toggle them between being alive or not. This is a bit tricky to do in a 3D game; since our mouse only knows about two-dimensions, we'll need to choose squares from different 2D slices of our universe. By clicking some cubes to set them alive, changing the active 2D slice, and repeating, we can should then be able to set the initial state of the game to be whatever we want. So let's get into it!
+
+### Pending Status Layers for Cubes
+
+In order to show the current 2D slice that the user can interact with, we'll need a way to visually represent cubes that are in the active 2D slice. From now on, we'll call this slice "pending layer," since cubes in it are "pending" and can be set to alive. In order to do work with this idea, we'll add another property to our a cube's `userData` property. Let's call it `inPendingLayer`.
+
+We'll create 2D slices of the universe along the _z_-axis. So for instance, our first layer could consist of all cubes with a _z_-coordinate of 0; our second layer could consist of all cubes with a _z_-coordinate of 1, and so on.
+
+To begin, implement a `setPending` method on `Cube.prototype`. Like `setAlive`, this method should accept a boolean that determines set a cube's `userData.inPendingLayer` property and styles it accordingly. Next, create `setPendingLayer` on `CubeUniverse.prototype` that takes a _y_-coordinate, and sets cubes with a matching _y_-coordinate to be in the pending layer.
+
+Once this is done, try loading the page without randomly setting initial life status on the cubes, so that the canvas looks empty. By calling `setPendingLayer` for different numbers, you should see the pending layer move on the screen.
+
+### Handling Mouse Events
+
+Once we have an active layer highlighted, we'd like to be able to mouse over a cube and click on it to toggle it from between pending and alive. 
+
+### Updating the Interface
+### Setting Up Examples
+### Supplemental Features

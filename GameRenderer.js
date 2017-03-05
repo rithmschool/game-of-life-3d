@@ -60,12 +60,3 @@ GameRenderer.prototype.addCameraControls = function(x,y,z) {
     controls.update();
     return controls;
 }
-
-
-
-
-
-
-
-
-

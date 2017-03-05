@@ -27,8 +27,30 @@ Cube.prototype.setAlive = function(lifeBool) {
   // determine whether to hide the cube or not
   if (arguments.length === 0 || lifeBool) {
     this.material.opacity = 0.5;
+    this.material.color = new THREE.Color( 0x00ff00 )
   } else {
-    this.material.opacity = 0
+    this.material.opacity = 0;
   }
   this.userData.isAlive = lifeBool;
+}
+
+Cube.prototype.setPending = function(pendingBool) {
+  // make sure the method is called correctly
+  if (typeof pendingBool !== 'boolean' && arguments.length) {
+    throw new TypeError("setPending called with wrong argument type");
+  }
+
+  // life status takes priority over pending status,
+  // so we need to check for it.
+  var isAlive = this.userData.isAlive;
+
+  // determine whether to hide the cube or not
+  if (arguments.length === 0 || pendingBool) {
+    this.material.opacity = 0.5;
+    this.material.color = new THREE.Color( isAlive ? 0x00ff00 : 0xffff00 )
+  } else {
+    // don't set to transparent if the cube's isAlive is set to true
+    this.material.opacity = isAlive ? 0.5 : 0;
+  }
+  this.userData.isPending = pendingBool;
 }
