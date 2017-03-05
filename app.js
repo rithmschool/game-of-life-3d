@@ -13,8 +13,7 @@ var game = new GameRenderer(
 );
 
 var universe = new CubeUniverse(12, [4, 5, 5, 5]);
-var probability = 0.3;
-var initialCubes = null;
+var probability = 0;
 
 // creating the game
 universe.eachCube(function(cube) {
@@ -25,7 +24,6 @@ universe.setRandomInitialState(probability);
 
 game.addCameraControls(universe.len / 2, universe.len / 2, universe.len / 2);
 game.render(universe);
-
 
 // attaching event listeners to menu
 for (var i = 0; i < sections.length; i++) {
@@ -67,3 +65,18 @@ start.addEventListener('click', function(e) {
       sections[i].classList.toggle('disabled');
     }
   });
+
+main.addEventListener('mousemove', function(e) {
+  // grab the components of the moust position,
+  // and normalize so that x and y are between -1 and 1
+  game.mouse.x = e.layerX / e.target.width * 2 - 1
+  game.mouse.y = (e.target.height - e.layerY) / e.target.height * 2 - 1
+});
+
+main.addEventListener('click', function(e) {
+  var cube = game.intersected;
+  if (cube) {
+    cube.setAlive(!cube.userData.isAlive);
+    cube.setHighlight();
+  }
+});

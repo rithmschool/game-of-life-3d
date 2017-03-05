@@ -153,8 +153,132 @@ Once this is done, try loading the page without randomly setting initial life st
 
 ### Handling Mouse Events
 
-Once we have an active layer highlighted, we'd like to be able to mouse over a cube and click on it to toggle it from between pending and alive. 
+Once we have an active layer highlighted, we'd like to be able to mouse over a cube and click on it to toggle it from between pending and alive. But right now we have no way of handling mouse events on the cubes! Since we're using a `canvas` to render our 3D scene, it's not like we can add event listeners to the page in the same way we did when we started building our user interface.
+
+Fortunately, this is where `Three.js` external libraries come to our aid once again. (If you ever have trouble doing something with the library, check out the examples in their documentation first - chances are good that there's a demo of what you're trying to do.) In this case, the secret sauce lies in [this](https://threejs.org/examples/#webgl_interactive_cubes) demonstration, which features cubes that respond to mousemove events. This is exactly what we need! In order to implement it, though, we'll first need to understand a bit about _raycasting_.
+
+#### Raycasting
+
+In general, raycasting is a technique used to create 3D perspectives. If you want to dive down a rabbit hole, [here's](http://lodev.org/cgtutor/raycasting.html) an article on how raycasting is used in Wolfenstein 3D, a game that relied heavily on raycasting.
+
+One application of raycasting is in determining what objects in a generated 3D space are intersected by a cursor. This is how we'll be using raycasting.
+
+Three.js allows us to create objects called `raycasters` which we can then use to capture elements in the scene betweeen the camera and some other object. In this case, we want "some other object" to be a vector based on our mouse coordinates.
+
+Here's how the general pattern will work. First, we need to keep track of our mouse position. Our `GameRenderer` will need to know about the mouse position, so add the following line to your constructor function:
+
+```js
+this.mouse = new THREE.Vector2();
+```
+
+Next, in your `app.js`, we need to update the coordinates of the mouse whenever you move it over the canvas:
+
+```js
+// 'main' refers to the div passed in to the GameRenderer;
+// i.e. it's the dom element inside of which Three.js inserts
+// the canvas element
+
+// 'game' refers to the object returned from GameRenderer
+// when it is called with the 'new' keyword
+
+main.addEventListener('mousemove', function(e) {
+  // grab the components of the moust position,
+  // and normalize so that x and y are between -1 and 1
+  game.mouse.x = e.layerX / e.target.width * 2 - 1
+  game.mouse.y = (e.target.height - e.layerY) / e.target.height * 2 - 1
+});
+```
+
+If you throw some `console.log` statements inside of the above callback, you should see the coordinates updating as your mouse moves.
+
+Next, we need to create a `raycaster`. Inside of your `GameRenderer` constructor function, add the following line:
+
+```js
+this.raycaster = new THREE.Raycaster();
+```
+
+This raycaster object is capabale of casting a ray (get it) between two vectors in our 3D space. And we can update this ray's direction to account for the position fo the mouse. To do this, inside of our `GameRenderer.prototype.render` method, add the following line:
+
+```js
+this.raycaster.setFromCamera(this.mouse, this.camera);
+// we'll remove this console log statement in a moment
+console.log(this.raycaster.ray.origin, this.raycaster.ray.direction);
+```
+
+What's going on here? To understand things a bit better, look at what's getting logged in the console. The origin of the `ray` attached to `this.raycaster` should be the position of your camera. But `this.raycaster.ray.direction` is changing based on your mouse's position. In other words, Three.js is taking your 2D mouse position coordinates, and translating appropriately into 3D coordinates for the scene on the canvas. Cool, right?
+
+What's more, once we have this ray, `Three.js` can also calculate any objects that intersect it. Let's remove the `console.log` statement above and replace it with the following:
+
+```js
+this.raycaster.setFromCamera(this.mouse, this.camera);
+var intersects = this.raycaster.intersectObjects( this.scene.children );
+console.log(intersects)
+```
+
+Note that the scene has a property on it called `children`, which refers to all objects that are in the scene. This includes all lights, meshes, and so on (basically anything added to the scene using `this.scene.add`). 
+
+#### Managing intersections
+
+Now you should be seeing an array with many objects inside of it whenever you hover over the cube universe. These are all of the cubes that are intersected by the raycaster ray! However, we're not interested in all the cubes that intersect. First, we're only interested in cubes in the pending layer that intersect with our ray. And second, we only want to get one cube, so that we can toggle its status with a mouse click. (Try to implement this on your own; this part is tricky, so we'll show you some code below.)
+
+Once you've found the right value for `intersects`, it's time to determine whether there's an intersection. Here, things can get a bit tricky, because you not only need to check for new intersections, but you also need to check whether or not there's an existing intersection, because you only want to be able to mouse over one cube at a time. This also means you need to store a reference to whatever is currently being intserected; you can do this by setting a property in the `GameRenderer` equal to `intersected`. (It can start out as `null`.)
+
+Before going any further, implement a `Cube.prototype.setHighlight` method. This should be very similar to `setAlive` and `setPending`, but is for highlighting a cube on mousemove.
+
+Once you have that, there are basically things to consider:
+
+1. There's a currently highlighted cube, but in the next frame there's either a new intersection or no intersection. When this happens, you need to un-highlight the current intersection.
+2. There's a newly intersected cube. In this case, you assign it to `game.intersected` and highlight it.
+3. There's no intersection in the next frame. In this case, `game.intersected` should be set to `null`.
+
+That's a fair amount of complexity to keep track of. If you have trouble implementing it, here's what we ended up adding to our `GameRenderer.prototype.render` method:
+
+```js
+// find a potential new intersection
+this.raycaster.setFromCamera(this.mouse, this.camera);
+var layerCubes = this.scene.children.filter(function(child) {
+    var isCube = child.constructor === Cube;
+    var inPendingLayer = child.position.y === universe.pendingLayer;
+    return isCube && inPendingLayer;
+});
+var intersects = this.raycaster.intersectObjects(layerCubes);
+
+// check if there's a new intersection
+var newIntersection = intersects.length > 0 && 
+    this.intersected !== intersects[0].object;
+
+// check if there's no intersection
+var noIntersection = intersects.length === 0;
+
+// if necessary, unhighlight the previous intersected
+if ((newIntersection || noIntersection) && this.intersected) {
+    this.intersected.setHighlight(false);
+}
+
+// if necessary, update highlight to new intersection
+if (newIntersection) {
+    this.intersected = intersects[0].object;
+    this.intersected.setHighlight();
+}
+
+// if necessary, reset this.intersected
+if (noIntersection) {
+    this.intersected = null;
+}
+```
+
+#### Handling Clicks
+
+We're able to handle mousemove events, but we can't actually click on cubes yet to toggle their life status! Fortunately, handling the click is much more straightforward than handling the mousemove. Try to implement it on your own!
 
 ### Updating the Interface
+
+Once you get the `click` event handler working for the canvas, you should be able to manually create your own cube universes from the browser! Now is a good time to update the UI as well. Here are some ways you can clean up the presentation:
+
+- Add an option for a user to toggle between game modes: either "random" or "manual."
+- If the mode is "random," the user can change the life probability as before. No cubes can be pending in "random" mode. (No need to deal with intersections either!)
+- If the mode is "manual", the user can update the pending layer and click on pending cubes to make them alive.
+- Once the game is playing, all cubes must be either alive or not; none can be pending.
+
 ### Setting Up Examples
 ### Supplemental Features

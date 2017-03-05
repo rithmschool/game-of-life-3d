@@ -1,6 +1,7 @@
-function CubeUniverse(len, evolveParams, randomProbability) {
+function CubeUniverse(len, evolveParams, pendingLayer) {
   this.len = len;
   this.evolveParams = evolveParams;
+  this.pendingLayer = pendingLayer || 0;
 
   this.cubes = [];
 
@@ -86,4 +87,5 @@ CubeUniverse.prototype.setPendingLayer = function(y) {
   this.eachCube(function(cube) {
     cube.setPending(cube.position.y === y);
   });
+  this.pendingLayer = y;
 }

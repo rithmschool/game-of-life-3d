@@ -54,3 +54,23 @@ Cube.prototype.setPending = function(pendingBool) {
   }
   this.userData.isPending = pendingBool;
 }
+
+Cube.prototype.setHighlight = function(highlightBool) {
+  // make sure the method is called correctly
+  if (typeof highlightBool !== 'boolean' && arguments.length) {
+    throw new TypeError("setHighlight called with wrong argument type");
+  }
+
+  var isAlive = this.userData.isAlive;
+  var isPending = this.userData.isPending;
+
+  if (arguments.length === 0 || highlightBool) {
+    // crank up opacity for highlight, and swap colors
+    this.material.opacity = 1;
+    this.material.color = new THREE.Color( isAlive ? 0xffff00 : 0x00ff00 );
+  } else {
+    // don't set to transparent if the cube's isAlive is set to true
+    this.material.opacity = isAlive || isPending ? 0.5 : 0;
+    this.material.color = new THREE.Color( isAlive ? 0x00ff00 : 0xffff00 );
+  }
+}
