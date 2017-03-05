@@ -8,6 +8,7 @@ var start = document.getElementById("start");
 var gameModeOptions = document.getElementById("game-modes");
 var width = main.clientWidth;
 var height = window.innerHeight;
+var asideWidth = document.querySelector('aside').clientWidth;
 
 // Game objects
 var game = new GameRenderer( width,
@@ -127,10 +128,8 @@ start.addEventListener('click', function(e) {
 main.addEventListener('mousemove', function(e) {
   // grab the components of the moust position,
   // and normalize so that x and y are between -1 and 1
-  game.mouse.x = e.layerX / width * 2 - 1
+  game.mouse.x = (e.pageX - asideWidth) / width * 2 - 1
   game.mouse.y = (height - e.layerY) / height * 2 - 1
-  debugger
-  console.log(game.mouse.x)
 });
 
 main.addEventListener('click', function(e) {
