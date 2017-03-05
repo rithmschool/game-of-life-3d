@@ -129,6 +129,7 @@ main.addEventListener('mousemove', function(e) {
   // and normalize so that x and y are between -1 and 1
   game.mouse.x = e.layerX / width * 2 - 1
   game.mouse.y = (height - e.layerY) / height * 2 - 1
+  debugger
   console.log(game.mouse.x)
 });
 
