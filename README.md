@@ -258,7 +258,7 @@ if ((newIntersection || noIntersection) && this.intersected) {
 // if necessary, update highlight to new intersection
 if (newIntersection) {
     this.intersected = intersects[0].object;
-    this.intersected.setHighlight();
+    this.intersected.setHighlight(true);
 }
 
 // if necessary, reset this.intersected

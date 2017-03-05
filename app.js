@@ -47,7 +47,8 @@ for (var i = 0; i < sections.length; i++) {
 
 // attaching event listeners to game parameters
 for (var i = 0; i < numberInputs.length; i++) {
-  numberInputs[i].addEventListener('click', function(e) {
+  numberInputs[i].addEventListener('input', function(e) {
+    console.log(e.target.value)
     var tgt = e.target;
     var idx = tgt.dataset.idx;
     universe.evolveParams[idx] = +tgt.value;
