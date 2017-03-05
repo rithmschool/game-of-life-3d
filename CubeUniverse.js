@@ -79,6 +79,17 @@ CubeUniverse.prototype.setRandomInitialState = function(prob) {
   });
 }
 
+CubeUniverse.prototype.setManualInitialState = function(data) {
+  this.evolveParams = data.evolveParams;
+  this.clear();
+  data.coords.forEach(function(coords) {
+    var x = coords[0];
+    var y = coords[1];
+    var z = coords[2];
+    this.cubes[x][y][z].setAlive(true);
+  }, this);
+}
+
 CubeUniverse.prototype.clear = function() {
   this.setRandomInitialState(0);
 }

@@ -1,13 +1,14 @@
-function GameRenderer(width, height, root) {
+function GameRenderer(width, height, root, mode) {
+	this.mode = mode || 'random';
 
 	// camera setup
 	var viewAngle = 45;
 	var aspect = width / height;
 	var near = 0.1;
-	var far = 10000;
+	var far = 1000;
 	this.camera = new THREE.PerspectiveCamera(viewAngle, aspect, near, far);
-	this.camera.position.set(10, 20, 40);
-	this.camera.lookAt(new THREE.Vector3(3,3,3));
+	this.camera.position.set(30, 25, 40);
+	this.camera.lookAt(new THREE.Vector3(6, 6, 6));
 
 	// scene setup
 	this.scene = new THREE.Scene();
@@ -19,8 +20,11 @@ function GameRenderer(width, height, root) {
 
 	// custom objects 
 	var whiteLight = new THREE.PointLight(0xffffff);
-	whiteLight.position.set(0, 10, 0);
-	this.scene.add(whiteLight);
+	whiteLight.position.set(0, 20, 0);
+	var whiteLight2 = new THREE.PointLight(0xffffff);
+	whiteLight2.intensity = 0.5
+	whiteLight2.position.set(20, 0, 0);
+	this.scene.add(whiteLight, whiteLight2);
 
 	// add placeholders for timers
 	this.oldTime = Date.now();
@@ -44,38 +48,40 @@ GameRenderer.prototype.render = function(universe) {
 	var change = this.newTime - this.oldTime;
 	requestAnimationFrame(this.render.bind(this, universe));
 
-	// find a potential new intersection
-	this.raycaster.setFromCamera(this.mouse, this.camera);
-	var layerCubes = this.scene.children.filter(function(child) {
-		var isCube = child.constructor === Cube;
-		var inPendingLayer = child.position.y === universe.pendingLayer;
-		return isCube && inPendingLayer;
-	});
-	var intersects = this.raycaster.intersectObjects(layerCubes);
+	if (game.mode === 'manual') {
+		// find a potential new intersection
+		this.raycaster.setFromCamera(this.mouse, this.camera);
+		var layerCubes = this.scene.children.filter(function(child) {
+			var isCube = child.constructor === Cube;
+			var inPendingLayer = child.position.y === universe.pendingLayer;
+			return isCube && inPendingLayer;
+		});
+		var intersects = this.raycaster.intersectObjects(layerCubes);
 
-	// check if there's a new intersection
-	var newIntersection = intersects.length > 0 && 
-		this.intersected !== intersects[0].object;
+		// check if there's a new intersection
+		var newIntersection = intersects.length > 0 && 
+			this.intersected !== intersects[0].object;
 
-	// check if there's no intersection
-	var noIntersection = intersects.length === 0;
+		// check if there's no intersection
+		var noIntersection = intersects.length === 0;
 
-	// if necessary, unhighlight the previous intersected
-	if ((newIntersection || noIntersection) && this.intersected) {
-		this.intersected.setHighlight(false);
+		// if necessary, unhighlight the previous intersected
+		if ((newIntersection || noIntersection) && this.intersected) {
+			this.intersected.setHighlight(false);
+		}
+
+		// if necessary, update highlight to new intersection
+		if (newIntersection) {
+			this.intersected = intersects[0].object;
+			this.intersected.setHighlight(true);
+		}
+
+		// if necessary, reset this.intersected
+		if (noIntersection) {
+			this.intersected = null;
+		}
 	}
-
-	// if necessary, update highlight to new intersection
-	if (newIntersection) {
-		this.intersected = intersects[0].object;
-		this.intersected.setHighlight();
-	}
-
-	// if necessary, reset this.intersected
-	if (noIntersection) {
-		this.intersected = null;
-	}
-
+	
 	if (game.playing && change > step) {
 		this.oldTime = this.newTime - change % step;
 		universe.evolve();

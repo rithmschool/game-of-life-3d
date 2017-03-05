@@ -89,18 +89,14 @@ aside > section > h1:hover,
   height: 100%;
 }
 
-#manual {
-  display: none;
-}
-
 #game-options {
   text-align: center;
 }
 
 button {
-    width: 45%;
+    width: 95%;
     padding: 5px;
-    margin: 10px 0;
+    margin: 10px auto;
     border-radius: 5px;
     border: none;
     font-family: 'Crimson Text', serif;
@@ -122,14 +118,6 @@ button:hover {
 
 #start {
   background-color: #649164;
-}
-
-#reset:hover {
-  background-color: #dd9ba1;
-}
-
-#reset {
-  background-color: #be6068;
 }
 
 #notes a {
@@ -176,7 +164,7 @@ input[type=number]:focus {
 
 input[type=range] {
   -webkit-appearance: none;
-  margin: 10px 0;
+  margin: 10px 0 20px;
   width: 100%;
   background-color: #195375;
 }
@@ -275,15 +263,6 @@ input[type=range]:focus::-ms-fill-upper {
   background: #8F8F8F;
 }
 
-small {
-  display: inline-block;
-  margin-bottom: 16px;
-}
-
-small a {
-  color: #FFFFFF;
-}
-
 .button-area {
   display: flex;
   justify-content: space-between;
@@ -300,4 +279,12 @@ small a {
 .disabled:hover {
   cursor: not-allowed;
   color: #888;
+}
+
+.hidden {
+  display: none;
+}
+
+aside a {
+  color: #FFF;
 }

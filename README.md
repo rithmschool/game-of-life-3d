@@ -61,7 +61,7 @@ Next, let's work on the `Cube` constructor, which is set up to inherit from `THR
 
 To begin, we'll assume that when a cube is created, it is not alive. We'll do this setting the `transparent` property on our cube material equal to `true`, setting the `opacity` on its material to 0, and by setting an `isAlive` property on the cube's `userData` to `false`. In Three.js, every element in the scene has a `userData` object onto which you can attach custom key-value pairs.
 
-You should also implement a `setAlive` method on the prototype, which accepts a boolean. If the boolean is `true`, the cube should be set to alive; otherwise, it should not. Calling `setAlive` with no arguments should be the same as calling it with an argument of `true`.
+You should also implement a `setAlive` method on the prototype, which accepts a boolean. If the boolean is `true`, the cube should be set to alive; otherwise, it should not.
 
 Once this is implemented, try creating a cube and adding it to the scene.
 
@@ -184,8 +184,8 @@ Next, in your `app.js`, we need to update the coordinates of the mouse whenever 
 main.addEventListener('mousemove', function(e) {
   // grab the components of the moust position,
   // and normalize so that x and y are between -1 and 1
-  game.mouse.x = e.layerX / e.target.width * 2 - 1
-  game.mouse.y = (e.target.height - e.layerY) / e.target.height * 2 - 1
+  game.mouse.x = e.layerX / e.target.width * 2 - 1;
+  game.mouse.y = (e.target.height - e.layerY) / e.target.height * 2 - 1;
 });
 ```
 
@@ -211,8 +211,8 @@ What's more, once we have this ray, `Three.js` can also calculate any objects th
 
 ```js
 this.raycaster.setFromCamera(this.mouse, this.camera);
-var intersects = this.raycaster.intersectObjects( this.scene.children );
-console.log(intersects)
+var intersects = this.raycaster.intersectObjects(this.scene.children);
+console.log(intersects);
 ```
 
 Note that the scene has a property on it called `children`, which refers to all objects that are in the scene. This includes all lights, meshes, and so on (basically anything added to the scene using `this.scene.add`). 
@@ -281,4 +281,17 @@ Once you get the `click` event handler working for the canvas, you should be abl
 - Once the game is playing, all cubes must be either alive or not; none can be pending.
 
 ### Setting Up Examples
+
+One last thing. Because there are so many different sets of rules we can create, and so many different initial states for the universe, finding interesting initial states and sets of rules can be time consuming. This project comes with an `examples.js` file which contains a few different initial states. So one last feature worth implementing is an "Examples" section, where you can choose from one of those examples and watch what happens.
+
+In order for this to work, you'll need to implement a `setManualInitialState` method on `CubeUniverse.prototype` which takes in an array of values for the parameters of the game, and an array of coordinate arrays for cubes that should start out alive, and creates the initial state in Three.js.
+
 ### Supplemental Features
+
+Looking for more? Here are some next steps.
+
+- Right now there's no way to go back to your initial manual state once you've started running the evolution. Add a "reset" button in manual mode that will return you to the initial state of the system.
+- Add the ability to save particularly interesting initial states using `localStorage!`
+- Give the user customization options for how they want their version of the game to look. 
+
+What other features can you think to add?
