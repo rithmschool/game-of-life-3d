@@ -6,11 +6,12 @@ var randomProbabilityVal = document.getElementById('random-probability-val');
 var layerVal = document.getElementById("layer-val");
 var start = document.getElementById("start");
 var gameModeOptions = document.getElementById("game-modes");
+var width = main.clientWidth;
+var height = window.innerHeight;
 
 // Game objects
-var game = new GameRenderer( 
-  main.clientWidth, 
-  window.innerHeight,
+var game = new GameRenderer( width,
+  height,
   main
 );
 
@@ -126,8 +127,8 @@ start.addEventListener('click', function(e) {
 main.addEventListener('mousemove', function(e) {
   // grab the components of the moust position,
   // and normalize so that x and y are between -1 and 1
-  game.mouse.x = e.layerX / e.target.width * 2 - 1
-  game.mouse.y = (e.target.height - e.layerY) / e.target.height * 2 - 1
+  game.mouse.x = e.layerX / width * 2 - 1
+  game.mouse.y = (height - e.layerY) / height * 2 - 1
   console.log(game.mouse.x)
 });
 
